@@ -3,10 +3,14 @@ Basic Calc module
 Includes funtions related to 
    Show parameters
    Draw curves
+   Some electrical calculations
 
 History:
    6/10/2017 : First version
+    3/3/2017 : Added compatibility with Python3
 '''
+
+from __future__ import print_function
 
 import numpy as np               # Import numpy for numeric calculations
 import pylab as pl               # Import pylab
@@ -20,7 +24,7 @@ import matplotlib.pyplot as plt
 Print a variable name, value and units
 '''
 def printVar(name,value,unit=""):
-    print name + " = " + str(value) + " " + unit
+    print(name + " = " + str(value) + " " + unit)
     
 '''
 Print a resistor value
@@ -28,17 +32,17 @@ Print a resistor value
 '''
 def printR(name,value):
     if value == -1.0:
-        print name + " = Open"
+        print(name + " = Open")
     else:        
-        print name + " = " + str(value) + " Ohm"    
-
+        print(name + " = " + str(value) + " Ohm")
+        
 '''
 Print a title with blank lines after and before
 '''    
 def printTitle(title):
-    print
-    print title
-    print
+    print()
+    print(title)
+    print()
 
 #########################################################################################
 # DRAWING CODE                                                                          #

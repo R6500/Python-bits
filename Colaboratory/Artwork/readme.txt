@@ -1,1 +1,1 @@
-
+Artwork for Colaboratory files

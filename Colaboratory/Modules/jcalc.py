@@ -8,7 +8,8 @@ Includes funtions related to
    Some electrical calculations
 
 History:
-   4/3/2017 : First version
+   4/03/2018 : First version
+   5/03/2018 : Added Euler and Runge-Kutta solvers
 '''
 
 from __future__ import print_function
@@ -225,6 +226,46 @@ def plotnn(xlist,ylist,title="",xt="",yt="",labels=[],location='best',logx=False
             _plotXY(x,y,label=lbl,logx=logx,logy=logy)
             
     _plotEnd(fig,ax,labels,location)  
+    
+#########################################################################################
+# DIFFERENTIAL EQUATIONS CODE                                                           #
+#########################################################################################      
+    
+'''
+Calculates the Euler solution of a dynamical system
+System is defined as:
+ dx/dt = f(x,t)
+Parameters:
+   x : State variable or vector 
+   t : Current time
+   f : function f(x,t)
+   h : time step interval
+Returns:
+   xNew : New value of x at time t+h
+'''
+def euler(x, t, f, h):
+    xNew = x + h * f(x,t)
+    return xNew
+    
+'''
+Calculates the 4th order Runge-Kutta approximation for a dynamical system
+System is defined as:
+ dx/dt = f(x,t)
+Parameters:
+   x : State variable or vector 
+   t : Current time
+   f : function f(x,t)
+   h : time step interval
+Returns:
+   xNew : New value of x at time t+h
+'''    
+def rk4(x, t, f, h): 
+    k1 = h * f(x,t)
+    k2 = h * f(x + k1/2.0 , t + h/2.0)
+    k3 = h * f(x + k2/2.0 , t + h/2.0)
+    k4 = h * f(x + k3     , t + h)
+    xNew = x + ( k1/6 + k2/3 + k3/3 + k4/6 )
+    return xNew    
     
 #########################################################################################
 # GEOMETRIC CODE                                                                        #

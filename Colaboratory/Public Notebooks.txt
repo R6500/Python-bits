@@ -1,0 +1,13 @@
+List of public notebooks
+
+Pendulum
+https://colab.research.google.com/drive/1GAjq-R4cTyVu90KjOd9P0_r4L1dNJNx9
+
+DC Motor
+https://colab.research.google.com/drive/1uOeXitZxeUZZdZlmT8d5pZNUr0QXrb5E
+
+Inverted Pendulum
+https://colab.research.google.com/drive/1Jpje3UWRr-ZvVKR1SlcwoM-KI1OGBNYA
+
+Common Emitter
+https://colab.research.google.com/drive/1o57vd-1jAhsuXuMI_HxixXEJiKh7cqGU

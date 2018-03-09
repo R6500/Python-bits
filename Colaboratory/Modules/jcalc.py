@@ -10,6 +10,7 @@ Includes funtions related to
 History:
    4/03/2018 : First version
    5/03/2018 : Added Euler and Runge-Kutta solvers
+   9/03/2018 : Added plotHist for histograms
 '''
 
 from __future__ import print_function
@@ -136,8 +137,7 @@ Optional parameters:
    logy : Use logarithmic x axis (Defaults to False)
    grid : Use grid (Default to True)
 
-Returns nothing
-Included in slab.py      
+Returns nothing     
 '''
 def plot11(x,y,title="",xt="",yt="",logx=False,logy=False,grid=True):
 
@@ -172,8 +172,7 @@ Optional parameters:
      logy : Use logarithmic x axis (Defaults to False)
      grid : Use grid (Default to True)     
 
-Returns nothing
-Included in slab.py     
+Returns nothing    
 '''
 def plot1n(x,ylist,title="",xt="",yt="",labels=[],location='best',logx=False,logy=False,grid=True):
 
@@ -211,8 +210,7 @@ Optional parameters:
      logy : Use logarithmic x axis (Defaults to False)
      grid : Use grid (Default to True)     
 
-Returns nothing
-Included in slab.py     
+Returns nothing    
 '''
 def plotnn(xlist,ylist,title="",xt="",yt="",labels=[],location='best',logx=False,logy=False,grid=True):
 
@@ -226,6 +224,31 @@ def plotnn(xlist,ylist,title="",xt="",yt="",labels=[],location='best',logx=False
             _plotXY(x,y,label=lbl,logx=logx,logy=logy)
             
     _plotEnd(fig,ax,labels,location)  
+    
+'''
+@plotHist@
+plotHist(v,bins=10,title="",xt="",yt="",grid)
+Plot an histagram from provided data
+
+Required parameters:
+  v : Data vector
+  
+Optional parameters:
+     bins : Number of bins for the histogram (Defaults to 10)
+    title : Plot title (Defaults to none)
+       xt : Label for x axis (Defaults to none)
+       yt : Label for y axis (Defaults to none)
+     grid : Use grid (Default to True)     
+     
+Returns nothing   
+'''    
+def plotHist(v,bins=10,title="",xt="",yt="",grid=True):
+
+    fig,ax = jcalc._plotStart(title,xt,yt,grid)
+
+    plt.hist(v,50)
+    
+    jcalc._plotEnd(fig,ax)    
     
 #########################################################################################
 # DIFFERENTIAL EQUATIONS CODE                                                           #

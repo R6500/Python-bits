@@ -244,11 +244,11 @@ Returns nothing
 '''    
 def plotHist(v,bins=10,title="",xt="",yt="",grid=True):
 
-    fig,ax = jcalc._plotStart(title,xt,yt,grid)
+    fig,ax = _plotStart(title,xt,yt,grid)
 
-    plt.hist(v,50)
+    plt.hist(v,bins)
     
-    jcalc._plotEnd(fig,ax)    
+    _plotEnd(fig,ax)    
     
 #########################################################################################
 # DIFFERENTIAL EQUATIONS CODE                                                           #

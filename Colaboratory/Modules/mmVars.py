@@ -118,7 +118,7 @@ class mmVar:
     def __str__(self):
         # String that represents the value (max:typ:min)
         if self.val != None:
-            return self.val
+            return str(self.val)
         if self.max == self.min:
             return str(self.max)
         else:  

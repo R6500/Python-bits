@@ -796,7 +796,7 @@ def cumulative(v):
     '''
     y = []
     count = 0
-    for value in x:
+    for value in v:
         count = count+1
         y.append(count)
     y = np.array(y)/count

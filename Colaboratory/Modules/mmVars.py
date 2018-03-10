@@ -4,6 +4,7 @@ Module to work with variables defined by maximum, minimum and typical values
 
 History:
    9/03/2018 : First version
+  10/03/2018 : Improvement of doMontecarlo 
 '''
 # Python 2.7 compatibility
 from __future__ import print_function
@@ -553,12 +554,11 @@ def doMontecarlo(n,func,*vars):
     Returns a list with all evaluations  
     '''
     ret = [] # Return list
-    for i in range(n):
-        for var in vars:
-            var.montecarlo()
-        value = func(*vars)
-        ret.append(value)
-    return ret    
+    for i in range(n):              # For all montecarlo cases
+        mVars = montecarlo(*vars)   # Calculate vars for this case
+        value = func(*mVars)        # Obtain function value
+        ret.append(value)           # Add result to return vector
+    return ret                      # Return vector
     
 def accumulated(v):
     '''Generates accumulated function from vector

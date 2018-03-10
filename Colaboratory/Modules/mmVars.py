@@ -785,21 +785,21 @@ def doMontecarlo(n,func,*vars):
     return vRet,vData
     
     
-def accumulated(v):
-    '''Generates accumulated function from vector
+   
+def cumulative(v):
+    '''
+    Generates a cumulative function from a sorted vector of values
     Arguments:
       v : Input vector
     Returns:
-      x : Vector values (v sorted)
       y : Cummulative values (all add to one)
     '''
-    x = sorted(v)
     y = []
     count = 0
     for value in x:
         count = count+1
         y.append(count)
     y = np.array(y)/count
-    return x,y
+    return y
       
       

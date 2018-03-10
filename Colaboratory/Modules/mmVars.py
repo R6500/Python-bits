@@ -701,7 +701,7 @@ def setTypical(*args):
     ret=[]
     for element in args:
         if isinstance(element,mmVar): 
-           ret.append(element.typical())
+           ret.append(element.setTypical())
         else:    
            ret.append(element)
     return tuple(ret)        

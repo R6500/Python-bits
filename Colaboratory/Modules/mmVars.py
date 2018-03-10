@@ -693,7 +693,7 @@ def cos(x):
         
 # Functions to get a value instance from the mmVAr objects ########
         
-def typical(*args):
+def setTypical(*args):
     '''Sets all variable arguments as typical values
       Argumnents : numbers or mmVar objects
       Returns a tuple with the values

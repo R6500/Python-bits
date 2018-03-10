@@ -4,7 +4,9 @@ Module to work with variables defined by maximum, minimum and typical values
 
 History:
    9/03/2018 : First version
-  10/03/2018 : Improvement of doMontecarlo 
+  10/03/2018 : Improvement of doMontecarlo
+               sq() now is not member but external function
+               Added exp() log() ipow(b,e) sin() cos()
 '''
 # Python 2.7 compatibility
 from __future__ import print_function
@@ -34,6 +36,8 @@ Constuctors
    mmVar(a,b,c)      Variable bound between a and b with c typical value
    mmVar(a,tol=vTol) Variable bound between a*(1-tol) and b*(1+tol)
    mmVar(a)          Constan variable with value a
+Additional parameters:
+   ns                 Treats distribution as normal with ns sigmas in max,min
   
 
 Normal mode: Max and Min values are propagated
@@ -46,11 +50,12 @@ Constant mode: Only val property is propagated
 class mmVar:
     # CONSTRUCTOR ###################################
     
-    def __init__(self,a,b=None,typ=None,tol=None):
+    def __init__(self,a,b=None,typ=None,tol=None,ns=0):
         # State memeber data
         self.val=None       # Current value of variable
         self.unique=False   # Unique variable can only be used once
         self.used=False     # Variable already used if unique
+        self.ns=ns          # Number of sigmas if normal
         # max, min, typ member data
         if b==None:
             # No b value is given
@@ -75,9 +80,13 @@ class mmVar:
             self.max=max(a,b)
             self.min=min(a,b)
             # Check is typical is between min and max
-            if typ != None:
+            if typ == None:
+                if ns != 0:
+                    # In normal distribution
+                    typ = (self.max+self.min)/2
+            else: 
                 if typ < self.min or typ > self.max:
-                    raise mmEx("Typical value out of bounds") 
+                    raise mmEx("Typical value out of bounds")    
             self.typ=typ         
 
     # INTERNAL METHODS ###################################
@@ -403,34 +412,6 @@ class mmVar:
         # Return new variable
         mm = mmVar(ma3,mi3,ty3)
         return mm
-           
-    def sq(self):
-        # Square operation
-        
-        # Get self values
-        ma1,mi1,ty1 = self._get_values()
-        
-        # Check if max = min
-        if ma1 == mi1:
-            return ma1*ma1
-          
-        # Check for zero in range
-        if self.max>0 and self.min<0:
-            mi2 = 0
-            ma2 = max(ma1*ma1,mi1*mi1)
-        else:
-            mi2 = min(ma1*ma1,mi1*mi1)
-            ma2 = max(ma1*ma1,mi1*mi1)
-            
-        # Check self typical for none
-        if ty1 == None:
-            ty2 = None
-        else:
-            ty2 = ty1*ty1
-            
-        # Return new variable
-        mm = mmVar(ma2,mi2,ty2)
-        return mm
         
     # RELATIONAL OPERATORS #################################  
     
@@ -479,7 +460,14 @@ class mmVar:
     def montecarlo(self):
         # Set value unifor random between bounds
         range = self.max - self.min
-        self.val = self.min + range*random.random()
+        midpoint = (self.max+self.min)/2
+        if self.ns == 0:
+            #Uniform distribution 
+            self.val = self.min + range*np.random.rand()
+        else:
+            #Normal distribution
+            sigma = range/(2*self.ns)            
+            self.val = np.random.normal(midpoint,sigma)
         return self.val
       
     # VARIABLE VALUE ########################################  
@@ -500,6 +488,210 @@ class mmVar:
         self.used=False
         self.unique=False
 
+# Helper functions  
+
+def get_values(x):
+    # Return maximum, minimum and typical if x is mmVAr
+    # If not, return tuple (x,x,x)
+    if isinstance(x,mmVar):
+        # Get self values
+        ma,mi,ty = x._get_values()
+    else:
+        ma = x
+        mi = x
+        ty = x    
+    return ma,mi,ty        
+      
+        
+# Mathematical functions
+
+def sq(x):
+    # Get x values
+    ma1,mi1,ty1 = get_values(x)
+        
+    # Check if max = min
+    if ma1 == mi1:
+        return ma1*ma1
+          
+    # Check for zero in range
+    if mi1 < 0 < ma1:
+        mi2 = 0
+        ma2 = max(ma1*ma1,mi1*mi1)
+    else:
+        mi2 = min(ma1*ma1,mi1*mi1)
+        ma2 = max(ma1*ma1,mi1*mi1)
+            
+    # Check self typical for none
+    if ty1 == None:
+        ty2 = None
+    else:
+        ty2 = ty1*ty1
+           
+    # Return new variable
+    mm = mmVar(ma2,mi2,ty2)
+    return mm
+      
+def exp(x):
+    # Get x values
+    ma1,mi1,ty1 = get_values(x)
+        
+    # Check if max = min
+    if ma1 == mi1:
+        return np.exp(ma1)
+      
+    # Calculate limits 
+    ma3 = np.exp(ma1)
+    mi3 = np.exp(mi1)
+            
+    # Check self typical for none
+    if ty1 == None:
+        ty3 = None
+    else:
+        ty3 = np.exp(ty1)
+           
+    # Return new variable
+    mm = mmVar(ma3,mi3,ty3)
+    return mm       
+        
+def log(x):
+    # Get x values
+    ma1,mi1,ty1 = get_values(x)
+        
+    # Check if max = min
+    if ma1 == mi1:
+        return np.log(ma1)
+      
+    # Calculate limits 
+    ma3 = np.log(ma1)
+    mi3 = np.log(mi1)
+            
+    # Check self typical for none
+    if ty1 == None:
+        ty3 = None
+    else:
+        ty3 = np.log(ty1)
+           
+    # Return new variable
+    mm = mmVar(ma3,mi3,ty3)
+    return mm          
+        
+def ipow(base,exp):
+    '''
+    Obtains base^exp
+    Restrictions:
+       exp must be integer positive
+    ''' 
+    # Check for zero
+    if exp == 0:
+        return 1
+        
+    # Check exp type
+    if type(exp) != int:
+        raise mmEx('Exponent should be integer')
+
+    # Check exp sign
+    if exp < 0:
+        raise mmEx('Exponent should be positive or zero')     
+        
+    # Get base values
+    ma1,mi1,ty1 = get_values(base)
+        
+    # Check if max = min
+    if ma1 == mi1:
+        return np.power(ma1,exp)
+    
+    # Basic solution
+    val1 = np.power(ma1,exp)
+    val2 = np.power(mi1,exp)
+    mi3 = min(val1,val2)
+    ma3 = max(val1,val2)
+    
+    # Special case for zero in range and even exponent
+    if (exp//2 == exp/2) and (mi1 < 0 < ma1):
+        mi3 = 0
+    
+    # Check self typical for none
+    if ty1 == None:
+        ty3 = None
+    else:
+        ty3 = np.power(ty1,exp)
+           
+    # Return new variable
+    mm = mmVar(ma3,mi3,ty3)
+    return mm        
+        
+def sin(x):
+    # Get x values
+    ma1,mi1,ty1 = get_values(x)
+        
+    # Check if max = min
+    if ma1 == mi1:
+        return np.sin(ma1)
+          
+    # Default monotonous solution      
+    val1 = np.sin(ma1)
+    val2 = np.sin(mi1)
+    mi3 = min(val1,val2)
+    ma3 = max(val1,val2)
+    
+    # Check for maximum in range
+    n1 = np.ceil((mi1-np.pi/2)/(2*np.pi))
+    n2 = np.floor((ma1-np.pi/2)/(2*np.pi)) 
+    if n1 <= n2:
+        ma3 = 1.0 # There is maximum
+        
+    # Check for minimum in range
+    n1 = np.ceil((mi1-3*np.pi/2)/(2*np.pi))
+    n2 = np.floor((ma1-3*np.pi/2)/(2*np.pi)) 
+    if n1 <= n2:
+        mi3 = -1.0 # There is minimum        
+            
+    # Check self typical for none
+    if ty1 == None:
+        ty3 = None
+    else:
+        ty3 = np.sin(ty1)
+           
+    # Return new variable
+    mm = mmVar(ma3,mi3,ty3)
+    return mm    
+
+def cos(x):
+    # Get x values
+    ma1,mi1,ty1 = get_values(x)
+        
+    # Check if max = min
+    if ma1 == mi1:
+        return np.cos(ma1)
+          
+    # Default monotonous solution      
+    val1 = np.cos(ma1)
+    val2 = np.cos(mi1)
+    mi3 = min(val1,val2)
+    ma3 = max(val1,val2)
+    
+    # Check for maximum in range
+    n1 = np.ceil(mi1/(2*np.pi))
+    n2 = np.floor(ma1/(2*np.pi)) 
+    if n1 <= n2:
+        ma3 = 1.0 # There is maximum
+        
+    # Check for minimum in range
+    n1 = np.ceil((mi1-np.pi)/(2*np.pi))
+    n2 = np.floor((ma1-np.pi)/(2*np.pi)) 
+    if n1 <= n2:
+        mi3 = -1.0 # There is minimum  
+            
+    # Check self typical for none
+    if ty1 == None:
+        ty3 = None
+    else:
+        ty3 = np.cos(ty1)
+           
+    # Return new variable
+    mm = mmVar(ma3,mi3,ty3)
+    return mm        
+        
 # Functions to get a value instance from the mmVAr objects ########
         
 def typical(*args):
@@ -542,7 +734,7 @@ def generic(*args):
       Arguments : list of mmVar objects
     '''  
     for element in args:
-        element.variable() 
+        element.generic() 
         
 # Functions to tests several cases
 

@@ -117,9 +117,8 @@ class mmVar:
           
     def __str__(self):
         # String that represents the value (max:typ:min)
-        ma1,mi1,ty1 = self._get_values() 
-        if ma1 == mi1:
-            return str(ma1)
+        if self.max == self.min:
+            return str(self.max)
         else:  
             return '('+str(self.max)+':'+str(self.typ)+':'+str(self.min)+')'
         
@@ -449,7 +448,7 @@ class mmVar:
          
     # FROZEN VALUE ##########################################    
         
-    def typical(self):
+    def setTypical(self):
         # Set value to typical one 
         # Object won't be aleatory anymore
         if self.typ == None:

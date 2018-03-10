@@ -12,6 +12,7 @@ from __future__ import division
 
 import random
 import numpy as np
+import functools
 
 # Exception code
 class mmEx(Exception):
@@ -545,20 +546,53 @@ def generic(*args):
         
 # Functions to tests several cases
 
+'''
 def doMontecarlo(n,func,*vars):
-    '''Performs several montecarlo executions
+    Performs several montecarlo executions
     Arguments:
       n     : Number of montecarlo runs
       func  : Function to evaluate with *vars arguments
       *vars : List of nnVars contained in the function
     Returns a list with all evaluations  
-    '''
+    
     ret = [] # Return list
     for i in range(n):              # For all montecarlo cases
         mVars = montecarlo(*vars)   # Calculate vars for this case
         value = func(*mVars)        # Obtain function value
         ret.append(value)           # Add result to return vector
     return ret                      # Return vector
+'''    
+  
+# Montecarlo compare helper function  
+def _monteCompare(a,b):
+    return a[0]-b[0]
+  
+def doMontecarlo(n,func,*vars):
+    '''Performs several montecarlo executions
+    Arguments:
+      n       : Number of montecarlo runs
+      func    : Function to evaluate with *vars arguments
+      *vars   : List of nnVars contained in the function
+    Returns:
+      vRes    : A sorted list of func values on each run
+      vData   : A sorted list of elements. Each one is a list with:
+                    Value of the function
+                    Tuple of coordinates of the function
+    '''
+    vRet  = []                        # Return list
+    vData = []                        # Data list
+    for i in range(n):                # For all montecarlo cases
+        mVars = montecarlo(*vars)  # Calculate vars for this case
+        value = func(*mVars)          # Obtain function value
+        vRet.append(value)            # Add resut to vRet
+        subList = [value,mVars]    
+        vData.append(subList)         # Add data to vData
+       
+    # Sort lists
+    vRet.sort() 
+    vData.sort(key=functools.cmp_to_key(_monteCompare));            
+    return vRet,vData
+    
     
 def accumulated(v):
     '''Generates accumulated function from vector

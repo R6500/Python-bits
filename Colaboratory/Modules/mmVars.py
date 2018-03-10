@@ -442,8 +442,6 @@ class mmVar:
       
     def typical(self):
         # Return the typical value
-        if self.typ == None:
-            raise mmEx('Undefined typical value')
         return self.typ
          
     # FROZEN VALUE ##########################################    

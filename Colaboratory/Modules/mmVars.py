@@ -783,16 +783,14 @@ def doMontecarlo(n,func,*vars):
     vRet.sort() 
     vData.sort(key=functools.cmp_to_key(_monteCompare));            
     return vRet,vData
-    
-    
-   
+       
 def cumulative(v):
     '''
     Generates a cumulative function from a sorted vector of values
     Arguments:
       v : Input vector
     Returns:
-      y : Cummulative values (all add to one)
+      y : Cumulative values 
     '''
     y = []
     count = 0
@@ -801,5 +799,23 @@ def cumulative(v):
         y.append(count)
     y = np.array(y)/count
     return y
-      
-      
+     
+def prob(v,a,b):
+    '''
+    Calculates the probability to have a value between min and max
+    Paramenters:
+      v : Sorted vector
+      a : Limit 1
+      b : Limit 2
+    Returns the probability  
+    '''   
+    mi = min(a,b)
+    ma = max(a,b)    
+    total = 0
+    count = 0    
+    for element in v:
+        total = total + 1
+        if mi <= element <= ma:
+            count = count + 1
+    return count/total   
+    

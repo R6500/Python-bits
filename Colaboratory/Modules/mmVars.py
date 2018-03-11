@@ -586,7 +586,7 @@ def log(x):
     ma1,mi1,ty1 = get_values(x)
         
     # Check sign
-    if mi1 < 0:
+    if mi1 <= 0:
         raise mmEx('Function sqrt() can only operate with always positive numbers')          
         
     # Check if max = min

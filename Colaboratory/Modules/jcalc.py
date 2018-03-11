@@ -220,7 +220,7 @@ Returns nothing
 '''
 def plotnn(xlist,ylist,title="",xt="",yt="",labels=[],location='best',logx=False,logy=False,grid=True):
 
-    fig,ax=plotStart(title,xt,yt,grid)
+    fig,ax=_plotStart(title,xt,yt,grid)
     
     if labels == []:
         for x,y in zip(xlist,ylist):

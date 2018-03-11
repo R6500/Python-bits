@@ -6,11 +6,17 @@ Includes funtions related to
    Show parameters
    Draw curves
    Some electrical calculations
+   
+This module is now deprecated and conserved for backward compatibility
+For new projects use:
+   jplot : Only for plotting on Jupyter or Colaboratory
+    calc : For other functions
 
 History:
    4/03/2018 : First version
    5/03/2018 : Added Euler and Runge-Kutta solvers
    9/03/2018 : Added plotHist for histograms
+  11/03/2018 : jcalc is now deprecated  
 '''
 
 from __future__ import print_function

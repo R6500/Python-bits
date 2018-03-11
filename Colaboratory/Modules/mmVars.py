@@ -587,7 +587,7 @@ def log(x):
         
     # Check sign
     if mi1 <= 0:
-        raise mmEx('Function sqrt() can only operate with always positive numbers')          
+        raise mmEx('Function log() can only operate with always positive numbers')          
         
     # Check if max = min
     if ma1 == mi1:
@@ -619,11 +619,11 @@ def ipow(base,exp):
         
     # Check exp type
     if type(exp) != int:
-        raise mmEx('Exponent should be integer')
+        raise mmEx('Exponent on ipow() should be integer')
 
     # Check exp sign
     if exp < 0:
-        raise mmEx('Exponent should be positive or zero')     
+        raise mmEx('Exponent on ipow() should be positive or zero')     
         
     # Get base values
     ma1,mi1,ty1 = get_values(base)

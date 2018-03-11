@@ -15,4 +15,8 @@ Example given to jcalc.py
 
 Current module list:
 
+  jplot : Miscelaneous plotting functions
+
+Deprecated module list:
+
   jcalc : Miscelaneous calculation and plotting functions

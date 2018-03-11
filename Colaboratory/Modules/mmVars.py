@@ -2,6 +2,9 @@
 mmVars.py
 Module to work with variables defined by maximum, minimum and typical values
 
+ToDo:
+  [ ] Add sqrt function
+
 History:
    9/03/2018 : First version
   10/03/2018 : Improvement of doMontecarlo
@@ -529,6 +532,32 @@ def sq(x):
     # Return new variable
     mm = mmVar(ma2,mi2,ty2)
     return mm
+      
+def sqrt(x):
+    # Get x values
+    ma1,mi1,ty1 = get_values(x)
+        
+    # Check sign
+    if mi1 < 0:
+        raise mmEx('Function sqrt() can only operate with always positive numbers')    
+        
+    # Check if max = min
+    if ma1 == mi1:
+        return np.sqrt(ma1)
+      
+    # Calculate limits 
+    ma3 = np.sqrt(ma1)
+    mi3 = np.sqrt(mi1)
+            
+    # Check self typical for none
+    if ty1 == None:
+        ty3 = None
+    else:
+        ty3 = np.sqrt(ty1)
+           
+    # Return new variable
+    mm = mmVar(ma3,mi3,ty3)
+    return mm            
       
 def exp(x):
     # Get x values

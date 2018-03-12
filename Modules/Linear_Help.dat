@@ -1,0 +1,369 @@
+@root
+This is the main page of the Linear module help
+List of topics:
+
+   linblk : Linear block class
+     plot : Plot functions
+     util : Utility functions  	
+	  
+You can also input the name of a particular command	
+@plot
+Plot functions topics:
+
+  Linear frequency:
+     showFreqMag
+     showFreqComplex
+
+  Log frequency:	 
+     showBodeMag
+     showBodePhase
+     drawBodePlot
+     addBodePlot
+	 
+  Pole/Zero:	 
+     addPoleZeroPlot
+     drawPoleZeroPlot	 
+	 
+  showPlot
+@util
+Utility functions topics:
+
+   frange : Generates log range
+      f2w : Hz to rad/s
+      w2f : rad/s to Hz
+       dB : Linear to dB
+  damping : Damping from poles
+        q : Q from poles
+
+  poleZeroPolar : Create pole or zero pair
+@frange
+frange(start,end,ndec,ppd)
+Generates a logarithmic range
+
+Required parameters:
+  start : start value
+    end : end value
+   ndec : number of decades
+   ppd : points per decade (defaults to 20)
+
+Either end or ndec must be provided   
+
+Returns a vector with the frequencies   
+   
+Examples      
+  >> f = frange(fstart,fend)          # Range with default 20 ppd
+  >> f = frange(fstary,fend,ppd=10)   # Range with 10 ppd
+  >> f = frange(fstart,ndec=4)        # 4 decades from fstart with default 20 ppd
+  >> f = frange(fstrat,ndec=4,ppd=10) # 4 decades with custom ppd
+@f2w
+f2w(f)
+Converts frequency from Hz to rad/s
+Returns frequency in rad/s   
+@w2f
+w2f(w)
+Converts frequency from rad/s to Hz
+Returns frequency in Hz  
+@showFreqMag
+showFreqMag(f,mag,title,ylabel)
+Linear frequency magnitude plot
+
+Required parameters:
+     f : Frequency vector (Hz)
+   mag : Magnitude vector 
+   
+Optional parameters:   
+  title : Plot title
+ ylabel : Y axis label
+ 
+Returns nothing 
+@showFreqComplex
+showFreqComplex(f,vector,title)
+Linear frequency magnitude and phase plot
+
+Required parameters:
+      f : Frequency vector (Hz)
+ vector : Complex vector
+ 
+Optional parameters:
+  title : Plot title
+  
+Returns nothing  
+@dB
+dB(gain)
+Converts linear gain in dB
+Returns value in dB
+@showBodeMag
+Show Bode magnitude plot
+
+Required parameters:
+    f : Frequency vector (Hz)
+  mag : Magnitude vector (dB)
+  
+Optional parameter:  
+ title : Plot title
+ 
+Returns nothing 
+@showBodePhase
+showBodePhase(f,phase,title)
+Show Bode phase plot
+
+Required parameters:
+      f : Frequency vector (Hz)
+  phase : Phase vector (deg)
+  
+Optional parameter:  
+ title : Plot title
+  
+Returns nothing 
+@addBodePlot
+addBodePlot(f,mag,phase,title,label)
+Adds a new bode plot
+Useful to show different Bode curves together
+
+Required parameters:
+      f : Frequency vector (Hz)
+    mag : Magnitude vector(dB)
+  phase : Phase vector (deg)
+  
+Optional parameters:  
+  title : Plot title
+  label : Label for the curve
+
+Returns nothing
+  
+It is recommended to put the title in the last plot of the series
+    Example:
+    >> addBodePlot(f,mag1,phase1,label='Curve 1') 
+    >> addBodePlot(f,mag2,phase2,title='Comparison',label='Curve 2')      
+    >> showPlot()
+	
+See also showPlot	
+@showPlot
+showPlot()
+Shows a multigraph plot
+Returns nothing
+@drawBodePlot
+drawBodePlot(f,mag,phase,title)
+Draws a bode plot
+
+Required parameters:
+      f : Frequency vector (Hz)
+    mag : Magnitude vector(dB)
+  phase : Phase vector (deg)
+  
+Optional parameters:  
+  title : Plot title (optional)
+  
+Returns nothing  
+@addPoleZeroPlot
+addPoleZeroPlot(poles,zeros,title,color)
+Adds poles to the current plot
+
+Parameters:
+  poles : List of poles
+  zeros : List of zeros       
+  title : Graph title (optional)
+  color : Color of symbols (defaults to blue)  
+
+Returns nothing  
+
+See also showPlot
+@drawPoleZeroPlot
+drawPoleZeroPlot(poles,zeros,title,color)
+Draw a poles-zero plot
+
+Parameters:
+  poles : List of poles
+  zeros : List of zeros
+  title : Graph title (optional)
+  color : Color of symbols (optional)
+  
+Returns nothing  
+@damping
+damping(pole)
+Returns the damping associated to a single pole
+The results make no sense for real poles
+   0 : Undamped (Oscillator)
+  <1 : Underdamped (Decaying oscillations)
+   1 : Critically damped or Overdamped (No oscillations) 
+@q
+q(pole)
+Returns the Q factor associated to a single pole
+The result make no sense for real poles
+@linblk
+class linblk
+Linear block class
+
+A new object can be created with:
+  >> l1 = linblk()               # H(s) = 1 
+  >> l2 = linblk([1],[1,1/p1])   # H(s) = 1 / ( 1 + s/p1 )
+  
+Or you can also use linFromPZ or lin1
+
+Additional topics:
+   linFromPZ, lin1, operators, methods
+@operators
+Operators available on the linblk class:
+
+  str : Shows numerator/denominator
+    * : Cascade of two systems  
+    / : Cascade with second system pole <-> zero
+    + : System output addition for same input
+    - : Negation operator
+    - : System substraction
+@methods	
+Methods available on the linblk class:
+They are seachable as help topics
+	
+           nf : Negative feedback nf()
+           pf : Positive feedback pf
+         eval : Evaluation in s plane
+        weval : Evaluation at jw
+         bode : Pode plot
+        freqR : Frequency response 
+     showBode : Bode plot
+      addBode : Add Bode plot
+        poles : List of poles
+        zeros : List of zeros
+         gain : System gain
+    addPZplot : Add PZ plot
+   showPZplot : PZ plot
+      printPZ : Print PZ list
+        clean : PZ cancelation
+      pzRange : Range for all PZ
+   plotSplane : Linear 3D Magnitude "s" plot
+    bode3Dmag : Log 3D Magnitude "s" plot
+  bode3Dphase : Log 3D Phase "s" plot
+@nf
+L1.nf(L2)
+L2 gives negative feedback on L1
+
+Retuns composite system
+@pf
+L1.nf(L2)
+L2 gives positive feedback on L1
+
+Retuns composite system
+@eval
+L1.eval(x)
+Evaluate the system on a point of the s plane
+   x : Complex value
+Returns a complex value
+@weval
+L1.weval(w)
+Evaluate the system on a point on the imaginary axis
+   w : Value on the j axis (Real value)
+Returns a complex value  
+@bode
+L1.bode(f)
+Generates the bode plot vector results
+   f : Frequency vector
+Returns:  
+    mag : Magnitude vector (dB)
+  phase : Phase vector (deg)
+@freqR  
+L1.freqR(f):
+Generates the frequency response as a vector
+  f : Frequency vector
+Returns frecuency response (complex)  
+@showBode
+L1.showBode(f,title):
+Shows the bode plot of the system
+      f : Frequency vector
+  title : Plot title (optional)
+Returns nothing   
+@addBode
+L1.addBode(f,title,label)
+Add the bode plot to the current image
+      f : Frequency vector
+  title : Plot title (optional)
+  label : Plot label (optional)
+Use showPlot() to see the final image  
+Returns noting
+@poles     
+L1.poles()
+Gives the list of poles of the system
+@zeros
+L1.zeros()
+Gives the list of zeros of the system  
+@gain
+gain()
+Gives the gain of the system
+We define gain as the quotient of the first coef (in increase order)
+of num and den that is not zero
+@addPZplot
+L1.addPZplot(title,color)
+Add the pole-zero plot to the current image
+    title : Plot title (optional)
+    color : Color used (optional)
+Use showPlot() to see the final image
+Returns nothing
+@showPZplot
+L1.showPZplot(title,color): 
+Show he pole-zero plot of the system
+    title : Plot title (optional)
+    color : Color used (optional)
+Returns nothing    
+@printPZ
+L1.printPZ()
+Show poles and zeros on screen
+Returns nothing
+@clean
+L1.clean(ratio)
+Eliminates poles and zeros that cancel each other
+A pole and a zero are considered equal if their distance
+is lower than 1/ratio its magnitude
+   ratio : Ratio to cancel PZ (default = 1000)
+Returns a new object
+@pzRange
+L1.pzRange()
+Returns in a tuple the range in the complex domain 
+that includes all the poles and zeros
+@plotSplane
+L1.plotSplane(zmax)
+Plots the magnitude of the evaluation of the
+system inside the s plane in dB(magnitude)
+    zmax : Maximum in Z axis (dB) (Optional)
+Returns nothing    
+@bode3Dmag
+L1.bode3Dmag(sfmax,zmax)
+Plots the magnitude of the evaluation of the
+system inside the s plane in dB(magnitude)
+The plot uses log10 of frequency in the axes
+    fmax : Maximum frequency (optional)
+    zmax : Maximum in Z axis (dB) (optional)
+Returns nothing
+@bode3Dphase
+L1.bode3Dphase(fmax)
+Plots the phase of the evaluation of the
+system inside the s plane in dB(magnitude)
+The plot uses log10 of frequency in the axes
+    fmax : Maximum frequency
+Returns nothing    
+@linFromPZ
+linFromPZ(poles,zeros,gain,ingain)
+Creates a system from the list of poles and zeros
+
+Parameters:
+  poles : List of poles
+  zeros : List of zeros 
+
+Gain can be defined as:
+   gain : Gain defined as the quotient of first num/den coef.
+  igain : Gain defined at infinite freq. in high pass 
+
+Returns a linblk object 
+@poleZeroPolar
+poleZeroPolar(mag,angle)
+Generates a list of two poles or zeros from
+their magnitude and angle on the s plane
+
+Required parameters:
+    mag : magnitude
+  angle : angle of one pole or zero (0 to 90)
+  
+Returns a list of two poles or zeros
+@lin1
+lin1
+Identity system H(s)=1
+@# EOF

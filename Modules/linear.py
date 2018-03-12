@@ -17,6 +17,11 @@ History:
 from __future__ import print_function
 from __future__ import division
 
+try:
+   input = raw_input
+except NameError:
+   pass
+
 '''
 @root
 This is the main page of the Linear module help
@@ -107,7 +112,7 @@ def help(topic="root"):
         print("root topic goes to main page")
         print("Just hit return to exit help")
         print()
-        topic = raw_input("Help topic : ")
+        topic = input("Help topic : ")
         if topic == "":
             print()
             return		

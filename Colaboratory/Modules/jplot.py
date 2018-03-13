@@ -6,6 +6,7 @@ Includes funtions related for drawing curves
  
 History:
   11/03/2018 : First version
+  13/03/2018 : Add version string
 '''
 
 from __future__ import print_function
@@ -14,6 +15,8 @@ import numpy as np               # Import numpy for numeric calculations
 import pylab as pl               # Import pylab
 import matplotlib.pyplot as plt
 
+# Version string
+version = '13/3/2018'
 
 #########################################################################################
 # DRAWING CODE                                                                          #

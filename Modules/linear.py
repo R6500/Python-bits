@@ -81,10 +81,6 @@ HELP_FILE = "Linear_Help.dat"
 # Define normal mode outside colaboratory
 colaboratory = False
 
-def setColaboratory(flag=True):
-    global colaboratory
-    colaboratory = flag
-
 # Exception code
 class LinearEx(Exception):
     def __init__(self, msg=""):
@@ -198,7 +194,7 @@ def setColaboratory(flag=True):
     Indicates that we are in Colaboartory
     Don't return anything
     """  
-    colaboratory = Flag    
+    colaboratory = flag    
     
 # Internal plot functions ############################################################
 

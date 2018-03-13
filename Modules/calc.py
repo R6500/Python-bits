@@ -7,9 +7,10 @@ Includes funtions related to
 
 History:
    6/10/2017 : First version
-    3/3/2018 : Added compatibility with Python 3
-    5/3/2018 : Added "grid" parameter to plot functions
-    9/3/2018 : Added plotHist
+   3/03/2018 : Added compatibility with Python 3
+   5/03/2018 : Added "grid" parameter to plot functions
+   9/03/2018 : Added plotHist
+  13/03/2018 : Added version string 
 '''
 
 # Python 2.7 compatibility
@@ -19,6 +20,8 @@ from __future__ import division
 import numpy as np               # Import numpy for numeric calculations
 import pylab as pl               # Import pylab
 import matplotlib.pyplot as plt
+
+version = '13/3/2018'
 
 #########################################################################################
 # PRINTING CODE                                                                         #

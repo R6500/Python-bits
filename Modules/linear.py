@@ -11,6 +11,9 @@ History:
   19/04/2016 : Add of 3D s-plane graphs
   29/03/2017 : Add of help system
   12/03/2018 : Added Python 2.7 and 3.x compatibility
+               Improvement of plotting on Colaboratory
+               Added version string
+               Help comments are now Python help compatible
 '''
 
 # Python 2.7 compatibility
@@ -22,7 +25,9 @@ try:
 except NameError:
    pass
 
-'''
+version = '12/3/2018'   
+   
+"""
 @root
 This is the main page of the Linear module help
 List of topics:
@@ -61,7 +66,7 @@ Utility functions topics:
         q : Q from poles
 
   poleZeroPolar : Create pole or zero pair
-'''
+"""
 
 import numpy as np               # Import numpy for numeric calculations
 import pylab as pl               # Import pylab
@@ -73,6 +78,13 @@ from numpy.polynomial import polynomial as P  # Polinomial functions
 # External files
 HELP_FILE = "Linear_Help.dat"
 
+# Define normal mode outside colaboratory
+colaboratory = False
+
+def setColaboratory(flag=True):
+    global colaboratory
+    colaboratory = flag
+
 # Exception code
 class LinearEx(Exception):
     def __init__(self, msg=""):
@@ -83,31 +95,37 @@ class LinearEx(Exception):
 
 #################### HELP CODE ###########################       
 
-'''
-Gives help information
-Parameters:
-   topic : Text to give information about
-           Defaults to root
-'''
+
 def help(topic="root"):
+    """
+    Gives help information
+    Parameters:
+        topic : Text to give information about
+                Defaults to root
+    Exits with a meesage if the help file is not found           
+    """    
     while (True):
         print()
         ftopic = "@"+topic
         topic_found = False
-        with open(HELP_FILE, 'r') as hfile:
-            for line in hfile:
-                if line.startswith("#"):
-                    continue
-                if not topic_found:
-                    if line.startswith("@#"):
-                        print( "'" + topic + "' topic not found")
-                        break
-                    elif line.upper().startswith(ftopic.upper()):
-                        topic_found = True
-                else:
-                    if line.startswith("@"):
-                        break
-                    print(line[0:-1])
+        try:
+            with open(HELP_FILE, 'r') as hfile:
+                for line in hfile:
+                    if line.startswith("#"):
+                        continue
+                    if not topic_found:
+                        if line.startswith("@#"):
+                            print( "'" + topic + "' topic not found")
+                            break
+                        elif line.upper().startswith(ftopic.upper()):
+                            topic_found = True
+                    else:
+                        if line.startswith("@"):
+                            break
+                        print(line[0:-1])
+        except:
+            print('Help file ',HELP_FILE,' is not available')
+            return
         print()
         print("root topic goes to main page")
         print("Just hit return to exit help")
@@ -119,28 +137,29 @@ def help(topic="root"):
 
 ##################### FREQUENCY HELPER FUNCTIONS #############################
 
-'''
-@frange
-frange(start,end,ndec,ppd)
-Generates a logarithmic range
 
-Required parameters:
-  start : start value
-    end : end value
-   ndec : number of decades
-   ppd : points per decade (defaults to 20)
-
-Either end or ndec must be provided   
-
-Returns a vector with the frequencies   
-   
-Examples      
-  >> f = frange(fstart,fend)          # Range with default 20 ppd
-  >> f = frange(fstary,fend,ppd=10)   # Range with 10 ppd
-  >> f = frange(fstart,ndec=4)        # 4 decades from fstart with default 20 ppd
-  >> f = frange(fstrat,ndec=4,ppd=10) # 4 decades with custom ppd
-'''
 def frange(start,end=0,ndec=0,ppd=20):
+    """
+    @frange
+    frange(start,end,ndec,ppd)
+    Generates a logarithmic range
+
+    Required parameters:
+       start : start value
+         end : end value
+        ndec : number of decades
+         ppd : points per decade (defaults to 20)
+
+    Either end or ndec must be provided   
+
+    Returns a vector with the frequencies   
+   
+    Examples      
+       >> f = frange(fstart,fend)          # Range with default 20 ppd
+       >> f = frange(fstary,fend,ppd=10)   # Range with 10 ppd
+       >> f = frange(fstart,ndec=4)        # 4 decades from fstart with default 20 ppd
+       >> f = frange(fstrat,ndec=4,ppd=10) # 4 decades with custom ppd
+    """
     stlog = np.log10(start)
     # We don't provide end 
     if end == 0:
@@ -151,311 +170,437 @@ def frange(start,end=0,ndec=0,ppd=20):
     endlog = np.log10(end)
     return 10**np.arange(stlog,endlog,1.0/ppd)
 
-'''
-@f2w
-f2w(f)
-Converts frequency from Hz to rad/s
-Returns frequency in rad/s   
-'''	
 def f2w(f):
+    """
+    @f2w
+    f2w(f)
+    Converts frequency from Hz to rad/s
+    Returns frequency in rad/s   
+    """
     return f*2*np.pi
 
-'''
-@w2f
-w2f(w)
-Converts frequency from rad/s to Hz
-Returns frequency in Hz  
-'''    
+
 def w2f(w):
+    """"
+    @w2f
+    w2f(w)
+    Converts frequency from rad/s to Hz
+    Returns frequency in Hz  
+    """   
     return w/(2*np.pi)
 
+# COLABORATORY FLAG FOR PLOTTING #####################################################
+
+def setColaboratory(flag=True):
+    """
+    @setColaboratory
+    setColaboratory(flag=True)
+    Indicates that we are in Colaboartory
+    Don't return anything
+    """  
+    colaboratory = Flag    
+    
+# Internal plot functions ############################################################
+
+def _plotStart():
+    """"
+    _plotStart
+    (Internal use function)
+    Starts a new plot
+    Returns:
+      fig : Figure object 
+    """
+    if colaboratory:
+        fig=plt.figure()
+        return fig
+    # Outside colaboratory
+    fig=plt.figure(facecolor="white")   # White border
+    return fig     
+
+def _subplotStart(fig,n,title="",xt="",yt="",grid=True):
+    """
+    _subplotStart
+    (Internal use function)
+    Starts a new subplot
+    Paramenters:
+      fig   : Figure to add the subplot
+      title : Title of the subplot (deafults to none)
+      xt    : x label of the subplot (defaults to none)
+      yt    : y label of the subplot (defaults to none)
+      grid  : Determines if there is grid (defaults to True)
+    Returns:
+      ax  : Axes object  
+    """    
+    # If we are inside colaboratory
+    if colaboratory:
+        ax = fig.add_subplot(n)
+        ax.set_facecolor("white")
+        ax.set_title(title)
+        ax.set_xlabel(xt)
+        ax.set_ylabel(yt) 
+        if (grid):
+            plt.grid(True,color="lightgrey",linestyle='--')
+        return ax
+    # Outside colaboratory
+    ax = fig.add_subplot(n)
+    ax.set_title(title)
+    ax.set_xlabel(xt)
+    ax.set_ylabel(yt)
+    if grid:
+        pl.grid()
+    return ax    
+    
+def _subplotEnd(ax,labels=[],location='best'):
+    """
+    _subplotEnd
+    (Internal use function)
+    Ends a subplot
+    Parameters:
+        ax       : Subplot axes
+        labels   : List of label names (Default to no labels)
+        location : Location for labels (Default to 'best')
+    Returns nothing    
+    """
+    if colaboratory:
+        if not labels == []:
+            pl.legend(loc=location)
+        xmin, xmax = plt.xlim()
+        ymin, ymax = plt.ylim()
+        ax.axvline(x=xmin,linewidth=2, color='black')
+        ax.axvline(x=xmax,linewidth=2, color='black')
+        ax.axhline(y=ymin,linewidth=2, color='black')
+        ax.axhline(y=ymax,linewidth=2, color='black')    
+    # Outside colaboratory
+    if not labels == []:
+        pl.legend(loc=location) 
+
+def _plotEnd():
+    """
+    _plotEnd
+    Ends a previously started plot
+    Takes no parameters
+    Returns nothing  
+    """
+    if colaboratory:
+        plt.show()   
+        return        
+    # Outside colaboratory
+    pl.show() 
+    pl.close() 
+    
 ################## LINEAR FREQUENCY PLOT HELPER FUNCTIONS ##################
-
-'''
-@showFreqMag
-showFreqMag(f,mag,title,ylabel)
-Linear frequency magnitude plot
-
-Required parameters:
-     f : Frequency vector (Hz)
-   mag : Magnitude vector 
-   
-Optional parameters:   
-  title : Plot title
- ylabel : Y axis label
- 
-Returns nothing 
-'''    
-def showFreqMag(f,mag,title='Magnitude Frequency Plot',ylabel='Magnitude'):
-    plt.figure(facecolor="white")   # White border
-    pl.grid()
-    pl.semilogx(f, mag)
-    pl.xlabel('Frequency (Hz)')     # Set X label
-    pl.ylabel(ylabel)               # Set Y label
-    pl.title(title)                 # Set title
-    pl.show()    
-    
-'''
-@showFreqComplex
-showFreqComplex(f,vector,title)
-Linear frequency magnitude and phase plot
-
-Required parameters:
-      f : Frequency vector (Hz)
- vector : Complex vector
- 
-Optional parameters:
-  title : Plot title
   
-Returns nothing  
-'''	
-def showFreqComplex(f,vector,title='Magnitude/Phase Frequency Plot'):
-    plt.figure(facecolor="white")   # White border
+def showFreqMag(f,mag,title='Magnitude Frequency Plot',ylabel='Magnitude'):
+    """
+    @showFreqMag
+    showFreqMag(f,mag,title,ylabel)
+    Linear frequency magnitude plot
     
-    pl.subplot(2,1,1)
-    pl.grid()
+    Required parameters:
+        f : Frequency vector (Hz)
+      mag : Magnitude vector (in linear units)
+   
+    Optional parameters:   
+      title : Plot title
+     ylabel : Y axis label
+ 
+    Returns nothing 
+    """  
+    fig=_plotStart()
+    ax  = _subplotStart(fig,111,title,'Frequency (Hz)',ylabel)
+    pl.semilogx(f, mag)
+    _subplotEnd(ax)
+    _plotEnd()
+    
+def showFreqComplex(f,vector,title='Magnitude/Phase Frequency Plot'):
+    """
+    @showFreqComplex
+    showFreqComplex(f,vector,title)
+    Linear frequency magnitude and phase plot
+
+    Required parameters:
+           f : Frequency vector (Hz)
+      vector : Complex vector
+ 
+    Optional parameters:
+       title : Plot title
+  
+    Returns nothing  
+    """
+    fig=_plotStart()
+    ax  = _subplotStart(fig,211,title,'','Magnitude')
     mag = np.absolute(vector)
     pl.semilogx(f, mag)
-    pl.xlabel('Frequency (Hz)')     # Set X label
-    pl.ylabel('Magnitude')          # Set Y label
-    pl.title(title)                 # Set title
+    _subplotEnd(ax)
     
-    pl.subplot(2,1,2)
-    pl.grid(True)
+    ax  = _subplotStart(fig,212,'','Frequency (Hz)','Phase')
     phase = np.angle(vector,deg=True)
     pl.semilogx(f, phase)
-    pl.xlabel('Frequency (Hz)')     # Set X label
-    pl.ylabel('Phase')              # Set Y label
-    
-    pl.show()   
+    _subplotEnd(ax)
+    _plotEnd()    
 
    
     
 ######################## BODE HELPER FUNCTIONS ############################    
  
-'''
-@dB
-dB(gain)
-Converts linear gain in dB
-Returns value in dB
-''' 
+
 def dB(gain):
+    """
+    @dB
+    dB(gain)
+    Converts linear gain in dB
+    Returns value in dB
+    """
     return 20*np.log10(gain)
 
-'''
-@showBodeMag
-Show Bode magnitude plot
-
-Required parameters:
-    f : Frequency vector (Hz)
-  mag : Magnitude vector (dB)
-  
-Optional parameter:  
- title : Plot title
- 
-Returns nothing 
-'''	
 def showBodeMag(f,mag,title='Magnitude Bode Plot'):
-    plt.figure(facecolor="white")   # White border
-    pl.grid(True)
+    """
+    @showBodeMag
+    Show Bode magnitude plot
+
+    Required parameters:
+          f : Frequency vector (Hz)
+        mag : Magnitude vector (dB)
+  
+    Optional parameter:  
+      title : Plot title
+ 
+    Returns nothing 
+    """	
+    fig=_plotStart()
+    ax=_subplotStart(fig,111,title,'Frequency (Hz)','Magnitude (dB)')
     pl.semilogx(f, mag)
-    pl.xlabel('Frequency (Hz)')     # Set X label
-    pl.ylabel('Magnitude (dB)')     # Set Y label
-    pl.title(title)                 # Set title
-    pl.show()
+    _subplotEnd(ax)
+    _plotEnd()
 
-'''
-@showBodePhase
-showBodePhase(f,phase,title)
-Show Bode phase plot
-
-Required parameters:
-      f : Frequency vector (Hz)
-  phase : Phase vector (deg)
-  
-Optional parameter:  
- title : Plot title
-  
-Returns nothing 
-'''	
 def showBodePhase(f,phase,title='Phase Bode Plot'):
-    plt.figure(facecolor="white") # White border
-    pl.grid(True)
+    """
+    @showBodePhase
+    showBodePhase(f,phase,title)
+    Show Bode phase plot
+
+    Required parameters:
+          f : Frequency vector (Hz)
+      phase : Phase vector (deg)
+  
+    Optional parameter:  
+      title : Plot title
+  
+    Returns nothing 
+    """	
+    fig=_plotStart()
+    ax=_subplotStart(fig,111,title,'Frequency (Hz)','Phase (deg)')
     pl.semilogx(f, phase)
-    pl.xlabel('Frequency (Hz)')   # Set X label
-    pl.ylabel('Phase (deg)')      # Set Y label
-    pl.title(title)               # Set title
-    pl.show() 
+    _subplotEnd(ax)
+    _plotEnd() 
 
-# Start value of handles    
-plot_handles = []
-
-# No current plot
-noPlot = True
-# Set white background
-#plt.figure(facecolor="white") # White border
-    
-'''
-@addBodePlot
-addBodePlot(f,mag,phase,title,label)
-Adds a new bode plot
-Useful to show different Bode curves together
-
-Required parameters:
-      f : Frequency vector (Hz)
-    mag : Magnitude vector(dB)
-  phase : Phase vector (deg)
-  
-Optional parameters:  
-  title : Plot title
-  label : Label for the curve
-
-Returns nothing
-  
-It is recommended to put the title in the last plot of the series
-    Example:
-    >> addBodePlot(f,mag1,phase1,label='Curve 1') 
-    >> addBodePlot(f,mag2,phase2,title='Comparison',label='Curve 2')      
-    >> showPlot()
-	
-See also showPlot	
-'''     
-def addBodePlot(f,mag,phase,title=None,label=None):
-    global plot_handles,noPlot
-
-    if noPlot:
-        plt.figure(facecolor="white") # White border
-        noPlot = False
-    
-    pl.subplot(2,1,1)
-    pl.grid(True)
-    pl.semilogx(f, mag)
-    pl.xlabel('Frequency (Hz)')   # Set X label
-    pl.ylabel('Magnitude (dB)')     # Set Y label
-    if title:
-        pl.title(title)             # Set title
-    
-    pl.subplot(2,1,2)
-    pl.grid(True)
-    if label:
-        hand, = pl.semilogx(f, phase, label=label)
-        plot_handles.append(hand)
-    else:
-        hand, = pl.semilogx(f, phase)
-        plot_handles.append(hand)
-    pl.xlabel('Frequency (Hz)')   # Set X label
-    pl.ylabel('Phase (deg)')      # Set Y label
-
-	
-'''
-@showPlot
-showPlot()
-Shows a multigraph plot
-Returns nothing
-'''	
-def showPlot():
-    global plot_handles,noPlot
-    if plot_handles != []:
-        plt.legend(handles=plot_handles)
-    pl.show()
-    plot_handles = []
-    noPlot = True
+# Information about bodes
+bodeLabels = []
+bodeFrequencies = []
+bodeMagnitudes = []
+bodePhases = []
      
-'''
-@drawBodePlot
-drawBodePlot(f,mag,phase,title)
-Draws a bode plot
+def addBodePlot(f,mag,phase,label=''):
+    """
+    @addBodePlot
+    addBodePlot(f,mag,phase,label)
+    Adds a new bode plot
+    Useful to show different Bode curves together
 
-Required parameters:
-      f : Frequency vector (Hz)
-    mag : Magnitude vector(dB)
-  phase : Phase vector (deg)
+    Required parameters:
+          f : Frequency vector (Hz)
+        mag : Magnitude vector(dB)
+      phase : Phase vector (deg)
   
-Optional parameters:  
-  title : Plot title (optional)
+    Optional parameters:  
+      label : Label for the curve (Defaults to no label)
+
+    Returns nothing
   
-Returns nothing  
-'''	 
-def drawBodePlot(f,mag,phase,title='Bode Plot'):
-    global plot_handles
-    addBodePlot(f,mag,phase,title=title)
-    plot_handles = []   # Don't show legend
+    See also showBodePlot	
+    """    
+    global bodeFrequencies,bodeMagnitudes,bodePhases,bodeLabels
+    bodeFrequencies.append(f)
+    bodeMagnitudes.append(mag)
+    bodePhases.append(phase)
+    bodeLabels.append(label)
+
+	
+def showBodePlot(title='Bode Plot',location='best'):  
+    """"
+    @showPlot
     showPlot()
+    Shows a multigraph plot
+    Optional parameters:
+          title : Title for the plot
+       location : Location for the labels (Defaults to 'best')
+    Returns nothing
+    """	
+    global bodeFrequencies,bodeMagnitudes,bodePhases,bodeLabels
+    fig=_plotStart()
+    ax  = _subplotStart(fig,211,title,'','Magnitude (dB)')
+    for element in zip(bodeFrequencies,bodeMagnitudes,bodeLabels):
+        if len(bodeFrequencies) == 1:
+            pl.semilogx(element[0],element[1],label='Nada')
+        else:
+            pl.semilogx(element[0],element[1],label=element[2])
+    # Legend only in phase plot        
+    #if len(bodeFrequencies) > 1:
+    #    pl.legend(loc=location)        
+    _subplotEnd(ax)
+    ax  = _subplotStart(fig,212,'','Frequency (Hz)','Phase (deg)')
+    for element in zip(bodeFrequencies,bodePhases,bodeLabels):
+        if len(bodeFrequencies) == 1:
+            pl.semilogx(element[0],element[1],label='Nada')
+        else:
+            pl.semilogx(element[0],element[1],label=element[2])        
+    if len(bodeFrequencies) > 1:
+        pl.legend(loc=location)         
+    _subplotEnd(ax)
+    _plotEnd() 
+    # Reset bode plots
+    bodeFrequencies = []
+    bodeLabels = []
+    bodeMagnitudes = []
+    bodePhases = []
+     
+def drawBodePlot(f,mag,phase,title='Bode Plot'):
+    """
+    @drawBodePlot
+    drawBodePlot(f,mag,phase,title)
+    Draws a bode plot
+
+    Required parameters:
+          f : Frequency vector (Hz)
+        mag : Magnitude vector(dB)
+      phase : Phase vector (deg)
+  
+    Optional parameters:  
+      title : Plot title
+  
+    Returns nothing  
+    """ 
+    addBodePlot(f,mag,phase)
+    showBodePlot(title)
 
 #################### S PLOT HELPER FUNCTIONS ######################
 
-'''
-@addPoleZeroPlot
-addPoleZeroPlot(poles,zeros,title,color)
-Adds poles to the current plot
+# Global variables
+pzPlotPoles  = []
+pzPlotZeros  = []
+pzPlotLabels = []
+pzPlotColors = []
 
-Parameters:
-  poles : List of poles
-  zeros : List of zeros       
-  title : Graph title (optional)
-  color : Color of symbols (defaults to blue)  
-
-Returns nothing  
-
-See also showPlot
-'''
-def addPoleZeroPlot(poles=[],zeros=[],title=None,color='blue'):
-    global noPlot
-    
-    if noPlot:
-        plt.figure(facecolor="white") # White border
-        noPlot = False    
-    
-    if title:
-        pl.title(title)             # Set title
-    if len(poles):
-        re = np.real(poles)
-        im = np.imag(poles)    
-        pl.scatter(re,im,marker='x',color=color)       
-    if len(zeros):
-        re = np.real(zeros)
-        im = np.imag(zeros)    
-        pl.scatter(re,im,marker='o',color=color)
-    pl.grid()
-    pl.xlabel('Real axis')           # Set X label
-    pl.ylabel('Imaginary axis')      # Set Y label
-
-'''
-@drawPoleZeroPlot
-drawPoleZeroPlot(poles,zeros,title,color)
-Draw a poles-zero plot
-
-Parameters:
-  poles : List of poles
-  zeros : List of zeros
-  title : Graph title (optional)
-  color : Color of symbols (optional)
-  
-Returns nothing  
-'''	
-def drawPoleZeroPlot(poles=[],zeros=[],title=None,color=None):
+def addPoleZeroPlot(poles=[],zeros=[],label=None,color='blue'):
+    """
+    @addPoleZeroPlot
     addPoleZeroPlot(poles,zeros,title,color)
-    showPlot()
+    Adds poles to the current plot
 
-'''
-@damping
-damping(pole)
-Returns the damping associated to a single pole
-The results make no sense for real poles
-   0 : Undamped (Oscillator)
-  <1 : Underdamped (Decaying oscillations)
-   1 : Critically damped or Overdamped (No oscillations) 
-'''	
+    Parameters:
+       poles : List of poles
+       zeros : List of zeros       
+       label : Label (optional)
+       color : Color of symbols (defaults to 'blue')  
+
+    Returns nothing  
+
+    See also showPoleZeroPlot
+    """
+    global pzPlotPoles,pzPlotZeros,pzPlotLabels,pzPlotColors
+    pzPlotPoles.append(poles)
+    pzPlotZeros.append(zeros)
+    pzPlotLabels.append(label)
+    pzPlotColors.append(color)
+    
+def showPoleZeroPlot(title='Pole(x) / Zero(o)  plot',location='best'):   
+    """
+    @showPoleZeroPlot
+    showPoleZeroPlot(title,location)
+    Draws a pole-zero plot after calls to addPoleZeroPlot
+    Optional parameters:
+       title    : Title for the plot
+       location : Location for the legend
+    """
+    global pzPlotPoles,pzPlotZeros,pzPlotLabels,pzPlotColors
+    labelBox = False
+    fig=_plotStart()
+    ax=_subplotStart(fig,111,title,'Real axis','Imaginary axis')
+       
+    for poles,zeros,label,color in zip(pzPlotPoles
+                       ,pzPlotZeros,pzPlotLabels,pzPlotColors):
+        showLabel = (label != None)
+        if len(poles):
+            re = np.real(poles)
+            im = np.imag(poles)    
+            if showLabel: 
+                pl.scatter(re,im,marker='x',label=label,color=color) 
+                labelBox=True
+                showLabel = False
+            else:
+                pl.scatter(re,im,marker='x',color=color)
+        if len(zeros):
+            re = np.real(zeros)
+            im = np.imag(zeros)
+            if showLabel: 
+                pl.scatter(re,im,marker='x',label=label,color=color) 
+                labelBox=True
+            else:
+                pl.scatter(re,im,marker='o',color=color) 
+
+    # Zero lines        
+    ax.axvline(x=0,linewidth=1, color='black', linestyle='--')
+    ax.axhline(y=0,linewidth=1, color='black', linestyle='--')
+            
+    if labelBox == True:
+        pl.legend(loc=location)     
+      
+    _subplotEnd(ax)
+    _plotEnd()  
+    # Reset lists
+    pzPlotPoles  = []
+    pzPlotZeros  = []
+    pzPlotLabels = []
+    pzPlotColors = []    
+
+def drawPoleZeroPlot(poles=[],zeros=[]
+                     ,title='Pole(x) & Zero(o)  plot'
+                     ,color='blue'):
+    """
+    @drawPoleZeroPlot
+    drawPoleZeroPlot(poles,zeros,title,color)
+    Draw a poles-zero plot
+
+    Parameters:
+       poles : List of poles
+       zeros : List of zeros
+       title : Graph title (optional)
+       color : Color of symbols (optional)
+  
+    Returns nothing  
+    """	                     
+    addPoleZeroPlot(poles,zeros,color=color)
+    showPoleZeroPlot()
+
 def damping(pole):
+    """
+    @damping
+    damping(pole)
+    Returns the damping associated to a single pole
+    The results make no sense for real poles
+        0 : Undamped (Oscillator)
+       <1 : Underdamped (Decaying oscillations)
+        1 : Critically damped or Overdamped (No oscillations) 
+    """	
     return -np.real(pole)/np.absolute(pole)
 
-'''
-@q
-q(pole)
-Returns the Q factor associated to a single pole
-The result make no sense for real poles
-'''	
 def q(pole):
+    """
+    @q
+    q(pole)
+    Returns the Q factor associated to a single pole
+    The result make no sense for real poles
+    """
     damp = damping(pole)
     return 1.0/(2.0*damp)
 
@@ -734,16 +879,13 @@ class linblk():
         mag, phase = self.bode(f)
         drawBodePlot(f,mag,phase,title)
         
-    def addBode(self,f,title=None,label=None):
+    def addBode(self,f,label=None):
         '''Add the bode plot to the current image
           f : Frequency vector
-        Use showPlot() to see the final image  
+        Use showBodePlot() to see the final image  
         '''
         mag, phase = self.bode(f)
-        if title:
-            addBodePlot(f,mag,phase,title,label=label)    
-        else:    
-            addBodePlot(f,mag,phase,label=label)
+        addBodePlot(f,mag,phase,label=label)    
             
     def poles(self):
         '''Get the list of poles of the system
@@ -779,22 +921,22 @@ class linblk():
         # gain = self.num.coef[0] / self.den.coef[0]
         gain = cnum/cden
         return gain        
-
-    def addPZplot(self,title=None,color=None):
+        
+    def addPZplot(self,label=None,color='blue'):
         '''Add the pole-zero plot to the current image
-        Use showPlot() to see the final image
+        Use showPoleZeroPlot() to see the final image
           title : Plot title (optional)
         '''
         poles = self.poles()
         zeros = self.zeros()
-        addPoleZeroPlot(poles,zeros,title,color)
+        addPoleZeroPlot(poles,zeros,label=label,color=color)
         
-    def showPZplot(self,title=None,color=None): 
+    def showPZplot(self,title='',color='blue',location='best'): 
         '''Add the pole-zero plot to the current image
           title : Plot title (optional)
         '''    
-        self.addPZplot(title,color)
-        showPlot()
+        self.addPZplot(color=color)
+        showPoleZeroPlot(title,location)
         
     def printPZ(self):
         '''Show poles and zeros on screen
@@ -868,7 +1010,8 @@ class linblk():
            zmax : Maximum in Z axis (dB)
         '''
         min,max = self.pzRange()
-        fig = plt.figure(facecolor="white")    # White border
+        fig = _plotStart()
+        #fig = plt.figure(facecolor="white")    # White border
         ax = fig.gca(projection='3d')
         X = np.linspace(1.5*np.real(min),0.0,100)
         Y = np.linspace(1.5*np.imag(min),1.5*np.imag(max),100)
@@ -878,11 +1021,14 @@ class linblk():
                        linewidth=0, antialiased=False)
  
         ax.contour(X, Y, Z)
-        ax.set_xlabel('Real')
-        ax.set_ylabel('Imaginary')
-        ax.set_zlabel('dB')
+        
+        #ax.set_xlabel('Real')
+        #ax.set_ylabel('Imaginary')
+        #ax.set_zlabel('dB')
 
-        plt.show()
+        #plt.show()
+        _subplotEnd(ax)
+        _plotEnd()
         
     def bode3Dmag(self,fmax=None,zmax=100.0):
         '''Plots the magnitude of the evaluation of the

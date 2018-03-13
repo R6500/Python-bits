@@ -10,6 +10,7 @@ History:
   10/03/2018 : Improvement of doMontecarlo
                sq() now is not member but external function
                Added exp() log() ipow(b,e) sin() cos()
+   13/3/2018 : Added version string            
 '''
 # Python 2.7 compatibility
 from __future__ import print_function
@@ -18,6 +19,9 @@ from __future__ import division
 import random
 import numpy as np
 import functools
+
+# Version string
+version = '12/03/2018'
 
 # Exception code
 class mmEx(Exception):

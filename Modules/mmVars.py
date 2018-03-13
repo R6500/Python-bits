@@ -35,62 +35,100 @@ class mmEx(Exception):
 mmVar Class definition
  
 Constuctors
-   mmVar(a,b)        Variable bound between a and b
-   mmVar(a,b,c)      Variable bound between a and b with c typical value
-   mmVar(a,tol=vTol) Variable bound between a*(1-tol) and b*(1+tol)
-   mmVar(a)          Constan variable with value a
+   mmVar(a,b)          Variable bound between a and b
+   mmVar(a,b,c)        Variable bound between a and b with c typical value
+   mmVar(a,tol=vTol)   Variable bound between a*(1-tol) and b*(1+tol)
+   mmVar(a)            Constan variable with value a
 Additional parameters:
    ns                 Treats distribution as normal with ns sigmas in max,min
-  
-
-Normal mode: Max and Min values are propagated
-              A variable can only be used one time if unique is set
+   
+mmVar objects can operate in two modes:   
+Base mode: Max and Min values are propagated
+              A variable can only be used one time if individual is set
 Constant mode: Only val property is propagated
                val is set in special methods
-                  .typical() sets val = typ
+                  .setTypical()    sets val = typ
+                  .montecarlo() sets val to random within range
 '''
  
 class mmVar:
     # CONSTRUCTOR ###################################
     
-    def __init__(self,a,b=None,typ=None,tol=None,ns=0):
+    def __init__(self,a,b=None,typ=None,tol=None,s=None,ns=0):
         # State memeber data
         self.val=None       # Current value of variable
         self.unique=False   # Unique variable can only be used once
         self.used=False     # Variable already used if unique
         self.ns=ns          # Number of sigmas if normal
+        self.typ=None       # Default self.typ
+        
         # max, min, typ member data
-        if b==None:
-            # No b value is given
-            if tol==None:
-                # No tolerance is given
-                self.max=a
-                self.min=a
-                self.typ=a
-                return
-            else:
+        if b == None:
+            # If b value is not given
+            if tol != None:
                 # Tolerance is given
-                self.typ=a
+                     
                 a1 = a*(1.0+tol)
                 a2 = a*(1.0-tol) 
                 self.max=max(a1,a2)
                 self.min=min(a1,a2)
+                
+                if self.typ == None:  # typ is not given
+                    self.typ = a
+                else:                 # typ is given
+                    if typ < self.min or typ > self.max:
+                        raise mmEx("Typical value out of bounds")    
+                    self.typ=typ
+                
+                if s != None and ns == 0:
+                    # s is given but ns is not
+                    ns = (self.max - self.min)/(2.0*s)
+                    self.ns = ns
+                return   
+           
+            if s != None:
+                # If s value is given but tolerance is not given
+                                   
+                if ns == 0:
+                    # If ns is not given we assume 3
+                    self.ns = 3
+                    
+                self.max=a+self.ns*s
+                self.min=a-self.ns*s   
+                
+                if self.typ == None:  # typ is not given
+                    self.typ = a
+                else:                 # typ is given
+                    if typ < self.min or typ > self.max:
+                        raise mmEx("Typical value out of bounds")    
+                    self.typ=typ
+                return
+                
+            if tol == None:
+                # No tolerance nor s is given
+                self.max = a
+                self.min = a
+                self.typ = a
+                self.ns = 0   # ns has no sense in this case
+                return                
         else:     
             # b value is given
             if tol != None:
                 raise mmEx("Ilegal use of tol argument")
-           
             self.max=max(a,b)
             self.min=min(a,b)
             # Check is typical is between min and max
             if typ == None:
-                if ns != 0:
+                if ns != 0 or s!= None:
                     # In normal distribution
-                    typ = (self.max+self.min)/2
+                    self.typ = (self.max+self.min)/2.0
             else: 
                 if typ < self.min or typ > self.max:
                     raise mmEx("Typical value out of bounds")    
-            self.typ=typ         
+                self.typ=typ         
+            # Recalculate ns if needed
+            if s != None and ns == None:
+                ns = (self.max-self.min)/(2.0*s)
 
     # INTERNAL METHODS ###################################
     
@@ -124,6 +162,8 @@ class mmVar:
             return str(self.val)
         if self.max == self.min:
             return str(self.max)
+        if self.typ == None:
+            return '('+str(self.max)+'::'+str(self.min)+')'  
         else:  
             return '('+str(self.max)+':'+str(self.typ)+':'+str(self.min)+')'
         

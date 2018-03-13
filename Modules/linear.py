@@ -194,7 +194,8 @@ def setColaboratory(flag=True):
     Indicates that we are in Colaboartory
     Don't return anything
     """  
-    global colaboratory = flag    
+    global colaboratory
+    colaboratory = flag    
     
 # Internal plot functions ############################################################
 

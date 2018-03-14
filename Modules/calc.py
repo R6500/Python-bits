@@ -23,7 +23,7 @@ import numpy as np               # Import numpy for numeric calculations
 import pylab as pl               # Import pylab
 import matplotlib.pyplot as plt
 
-version = '14/3/2018-B'
+version = '14/3/2018-C'
 
 # Define normal mode outside colaboratory
 colaboratory = False
@@ -357,7 +357,7 @@ Optional parameters:
 
 Returns nothing
 '''
-def plotnn(xlist,ylist,title="",xt="",yt="",labels=[],location='best',logx=False,logy=False,grid=False):
+def plotnn(xlist,ylist,title="",xt="",yt="",labels=[],location='best',logx=False,logy=False,grid=True):
     if colaboratory:
         jplotnn(xlist,ylist,title,xt,yt,labels,location,logx,logy,grid)
         return

@@ -2,8 +2,8 @@ Python modules
 
 You can use those modules in your own computer or in Google Colaboratory
 
-In order to use one module in google colaboratory
-Example given to calc.py
+In order to use one module in google colaboratory follow this instructions:
+Example is given to calc.py
 
    1) Locate the raw view of the module in GitHub
          https://raw.githubusercontent.com/R6500/Python-bits/master/Modules/calc.py

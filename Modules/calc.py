@@ -12,6 +12,7 @@ History:
    9/03/2018 : Added plotHist
   13/03/2018 : Added version string 
   14/03/2018 : Added f2s and decimal formatting in printVar and printR
+               Add plot support in Google Colaboratory
 '''
 
 # Python 2.7 compatibility
@@ -22,7 +23,10 @@ import numpy as np               # Import numpy for numeric calculations
 import pylab as pl               # Import pylab
 import matplotlib.pyplot as plt
 
-version = '13/3/2018'
+version = '14/3/2018-B'
+
+# Define normal mode outside colaboratory
+colaboratory = False
 
 #########################################################################################
 # PRINTING CODE                                                                         #
@@ -36,14 +40,26 @@ def f2s(v):
     If greater than one, uses three decimal places
     if less than one, uses three significant decimal places
     """
+    # Base number of decimals
     a = abs(v)
-    if a <1:
-        ndec = 3-np.log10(a)
-        return ('{0:.%df}' % ndec).format(v)
-    if a < 1000:
-        return "{0:.3f}".format(v)
-    # Default option  
-    return "{0:.2f}".format(v)
+    if nd == None:
+        ndec = 3
+        if (a>=1000): ndec = 2
+        if (a<1): ndec = int(np.floor(3-np.log10(a)))
+    else:
+        ndec = nd
+        if (a<1): ndec = int(np.floor(nd-np.log10(a)))
+
+    # Check for significance
+    v2 = v
+    for i in range(0,ndec):
+        if np.floor(v2) == v2:
+            ndec = i+1
+            break
+        v2 = v2*10.0    
+    
+    # Return string
+    return ('{0:.%df}' % ndec).format(v)
 
 def printVar(name,value,unit=""):
     """
@@ -70,6 +86,143 @@ def printTitle(title):
     print(title)
     print()
 
+#########################################################################################
+# COLABORATORY DRAWING CODE                                                             #
+#########################################################################################    
+
+'''
+These are the same normal plot functions but optimized to be used in
+Google Colaboratory
+'''
+# COLABORATORY FLAG FOR PLOTTING #####################################################
+
+def setColaboratory(flag=True):
+    """
+    @setColaboratory
+    setColaboratory(flag=True)
+    Indicates that we are in Colaboartory
+    Don't return anything
+    """  
+    global colaboratory
+    colaboratory = flag   
+
+# Internal functions ####################################################################
+
+'''
+_jplotStart
+Starts a new plot
+Paramenters:
+  title : Title of the plot (defaults to none)
+  xt    : x label of the plot (defaults to none)
+  yt    : y label of the plot (defaults to none)
+  grid  : Determines if there is grid (defaults to True)
+Returns:
+  fig : Figure object
+  ax  : Axes object  
+'''
+def _jplotStart(title="",xt="",yt="",grid=True):
+    fig=plt.figure()
+    ax = fig.add_subplot(111)
+    ax.set_facecolor("white")
+    ax.set_title(title)
+    ax.set_xlabel(xt)
+    ax.set_ylabel(yt)
+    if (grid):
+        plt.grid(True,color="lightgrey",linestyle='--')
+    return fig,ax
+
+'''
+_jplotEnd
+Ends a previously started plot
+Paramenters:
+  fig      : Figure object obtained from plotStart
+  ax       : Axes obtained from plotStart
+  labels   : List of labels for the curves (defaults to none)
+  location : Location for labels (defaults to 'best')
+Returns nothing  
+'''    
+def _jplotEnd(fig,ax,labels=[],location='best'):
+    if not labels == []:
+        pl.legend(loc=location)
+    xmin, xmax = plt.xlim()
+    ymin, ymax = plt.ylim()
+    ax.axvline(x=xmin,linewidth=2, color='black')
+    ax.axvline(x=xmax,linewidth=2, color='black')
+    ax.axhline(y=ymin,linewidth=2, color='black')
+    ax.axhline(y=ymax,linewidth=2, color='black')
+    plt.show()
+
+'''
+_jplotXY
+Plot two magnitudes using log if needed
+Used by the plot11, plot1n and plotnn commands
+'''
+def _jplotXY(x,y,label="",logx=False,logy=False):
+    if not logx and not logy:
+        pl.plot(x,y,label=label)
+        return
+    if logx and not logy:
+        pl.semilogx(x,y,label=label)
+        return
+    if logy and not logx:
+        pl.semilogy(x,y,label=label)
+        return
+    if logx and logy:
+        pl.loglog(x,y,label=label)
+        return
+     
+# Public functions ######################################################################
+     
+def jplot11(x,y,title="",xt="",yt="",logx=False,logy=False,grid=True):
+
+    # Generate sequence if x is not provided
+    if x == []:
+        x = np.arange(0,len(y))
+       
+    fig,ax = _jplotStart(title,xt,yt,grid)
+
+    _jplotXY(x,y,logx=logx,logy=logy)
+    
+    _jplotEnd(fig,ax)
+    
+def jplot1n(x,ylist,title="",xt="",yt="",labels=[],location='best',logx=False,logy=False,grid=True):
+
+    # Generate sequence is x is not provided
+    if x == []:
+        x = np.arange(0,len(ylist[0]))        
+        
+    fig,ax=_jplotStart(title,xt,yt,grid)
+    
+    if labels == []:
+        for y in ylist:
+            _jplotXY(x,y,logx=logx,logy=logy)
+    else:
+        for y,lbl in zip(ylist,labels):
+            _jplotXY(x,y,label=lbl,logx=logx,logy=logy)
+
+    _jplotEnd(fig,ax,labels,location)   
+  
+def jplotnn(xlist,ylist,title="",xt="",yt="",labels=[],location='best',logx=False,logy=False,grid=True):
+
+    fig,ax=_jplotStart(title,xt,yt,grid)
+    
+    if labels == []:
+        for x,y in zip(xlist,ylist):
+            _jplotXY(x,y,logx=logx,logy=logy)
+    else:
+        for x,y,lbl in zip(xlist,ylist,labels):
+            _jplotXY(x,y,label=lbl,logx=logx,logy=logy)
+            
+    _jplotEnd(fig,ax,labels,location)  
+    
+def jplotHist(v,bins=10,title="",xt="",yt="",grid=True):
+
+    fig,ax = _jplotStart(title,xt,yt,grid)
+
+    plt.hist(v,bins)
+    
+    _jplotEnd(fig,ax)       
+    
 #########################################################################################
 # DRAWING CODE                                                                          #
 #########################################################################################
@@ -114,6 +267,9 @@ Optional parameters:
 Returns nothing
 '''
 def plot11(x,y,title="",xt="",yt="",logx=False,logy=False,grid=True):
+    if colaboratory:
+        jplot11(x,y,title,xt,yt,logx,logy,grid)
+        return
      
     # Generate sequence if x is not provided
     if x == []:
@@ -153,7 +309,10 @@ Optional parameters:
 Returns nothing
 '''
 def plot1n(x,ylist,title="",xt="",yt="",labels=[],location='best',logx=False,logy=False,grid=True):
-
+    if colaboratory:
+        jplot1n(x,ylist,title,xt,yt,labels,location,logx,logy,grid)
+        return
+        
     # Generate sequence is x is not provided
     if x == []:
         x = np.arange(0,len(ylist[0]))        
@@ -199,6 +358,9 @@ Optional parameters:
 Returns nothing
 '''
 def plotnn(xlist,ylist,title="",xt="",yt="",labels=[],location='best',logx=False,logy=False,grid=False):
+    if colaboratory:
+        jplotnn(xlist,ylist,title,xt,yt,labels,location,logx,logy,grid)
+        return
 
     plt.figure(facecolor="white")   # White border
     if labels == []:
@@ -234,6 +396,9 @@ Optional parameters:
 Returns nothing   
 '''    
 def plotHist(v,bins=10,title="",xt="",yt="",grid=True):
+    if colaboratory:
+        jplotHist(v,bins,title,xt,yt,grid)
+        return
       
     plt.figure(facecolor="white")   # White border
     

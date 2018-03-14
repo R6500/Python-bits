@@ -23,7 +23,7 @@ import numpy as np               # Import numpy for numeric calculations
 import pylab as pl               # Import pylab
 import matplotlib.pyplot as plt
 
-version = '14/3/2018-C'
+version = '14/3/2018-D'
 
 # Define normal mode outside colaboratory
 colaboratory = False
@@ -32,13 +32,14 @@ colaboratory = False
 # PRINTING CODE                                                                         #
 #########################################################################################
 
-def f2s(v):
+def f2s(v,nd=None):
     """
     f2s (float2string)
     Takes one float value and converts it to string
     If greater or equal than 1000, uses two decimal places
     If greater than one, uses three decimal places
     if less than one, uses three significant decimal places
+    The optional parameter can fix the number of significant digits
     """
     # Base number of decimals
     a = abs(v)

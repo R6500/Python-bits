@@ -19,6 +19,7 @@ Example given to calc.py
  
       calc : Module with miscelaneous calculating and plottig functions
              Raw URL: https://raw.githubusercontent.com/R6500/Python-bits/master/Modules/calc.py
+             Description: https://colab.research.google.com/drive/1szN9FmWKQwPByMMMzmK7NqhXDYJ6rUP0#scrollTo=M3yxEC-GKlSL
     
     mmVars : Module that define objects to work with maximum and minimum value calculations
              Raw URL: https://raw.githubusercontent.com/R6500/Python-bits/master/Modules/mmVars.py

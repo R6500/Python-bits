@@ -11,6 +11,7 @@ History:
    5/03/2018 : Added "grid" parameter to plot functions
    9/03/2018 : Added plotHist
   13/03/2018 : Added version string 
+  14/03/2018 : Added f2s and decimal formatting in printVar and printR
 '''
 
 # Python 2.7 compatibility
@@ -27,26 +28,44 @@ version = '13/3/2018'
 # PRINTING CODE                                                                         #
 #########################################################################################
 
-'''
-Print a variable name, value and units
-'''
+def f2s(v):
+    """
+    f2s (float2string)
+    Takes one float value and converts it to string
+    If greater or equal than 1000, uses two decimal places
+    If greater than one, uses three decimal places
+    if less than one, uses three significant decimal places
+    """
+    a = abs(v)
+    if a <1:
+        ndec = 3-np.log10(a)
+        return ('{0:.%df}' % ndec).format(v)
+    if a < 1000:
+        return "{0:.3f}".format(v)
+    # Default option  
+    return "{0:.2f}".format(v)
+
 def printVar(name,value,unit=""):
-    print(name + " = " + str(value) + " " + unit)
+    """
+    Print a variable name, value and units
+    """
+    print(name + " = " + f2s(value) + " " + unit)
     
-'''
-Print a resistor value
--1.0 means infinite
-'''
+
 def printR(name,value):
+    """
+    Print a resistor value
+    -1.0 means infinite
+    """
     if value == -1.0:
         print(name + " = Open")
     else:        
-        print(name + " = " + str(value) + " Ohm")
-        
-'''
-Print a title with blank lines after and before
-'''    
+        print(name + " = " + f2s(value) + " Ohm")
+           
 def printTitle(title):
+    """
+    Print a title with blank lines after and before
+    """ 
     print()
     print(title)
     print()

@@ -23,7 +23,7 @@ import numpy as np               # Import numpy for numeric calculations
 import pylab as pl               # Import pylab
 import matplotlib.pyplot as plt
 
-version = '14/3/2018-D'
+version = '14/3/2018-E'
 
 # Define normal mode outside colaboratory
 colaboratory = False
@@ -61,22 +61,61 @@ def f2s(v,nd=None):
     
     # Return string
     return ('{0:.%df}' % ndec).format(v)
-
-def printVar(name,value,unit=""):
+   
+def f2sci(v,unit='',nd=3,prefix=True):
+    """
+    Takes one float and converts it to scientific notation
+    Required parameters
+       v : Number to convert
+    Optional parameters
+        unit : Unit to show
+          nd : Number of decimal places (Default to 3) 
+      prefix : Use standard prefixes for powers of 10 up to +/-18
+    """
+    potH=['k','M','G','T','P','E']
+    potL=['m','u','n','p','f','a']
+    a = abs(v)
+    ndec = int(np.floor(np.log10(a)))
+    pot = int(np.floor(ndec/3))
+    exp = 3*pot
+    base = v/(10.0**exp)
+    s = f2s(base,nd)
+    if pot==0: 
+        return s + ' ' + unit
+      
+    if (prefix):
+        if 1 <= pot <=6:
+            s = s + ' ' + potH[pot-1] + unit
+            return s
+        if 1 <= -pot <=6:
+            s = s + ' '+ potL[-pot-1] + unit
+            return s
+    
+    s = s + 'E' + ('{:+d}').format(exp) + ' ' + unit
+    return s    
+    
+def printVar(name,value,unit="",useSci=True,prefix=True):
     """
     Print a variable name, value and units
     """
-    print(name + " = " + f2s(value) + " " + unit)
+    if useSci:
+        print(name + " = " + f2sci(value,unit,prefix=prefix))
+    else:
+        print(name + " = " + f2s(value) + " " + unit)
     
 
-def printR(name,value):
+def printR(name,value,useSci=True,prefix=True):
     """
     Print a resistor value
     -1.0 means infinite
     """
     if value == -1.0:
         print(name + " = Open")
-    else:        
+        return
+    
+    if useSci:
+        print(name + " = " + f2sci(value,"Ohm",prefix=prefix))
+    else:
         print(name + " = " + f2s(value) + " Ohm")
            
 def printTitle(title):

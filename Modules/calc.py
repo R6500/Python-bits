@@ -13,6 +13,7 @@ History:
   13/03/2018 : Added version string 
   14/03/2018 : Added f2s and decimal formatting in printVar and printR
                Add plot support in Google Colaboratory
+  15/03/2018 : Change parameter useSci for sci in print functions             
 '''
 
 # Python 2.7 compatibility
@@ -23,7 +24,7 @@ import numpy as np               # Import numpy for numeric calculations
 import pylab as pl               # Import pylab
 import matplotlib.pyplot as plt
 
-version = '14/3/2018-E'
+version = '15/3/2018'
 
 # Define normal mode outside colaboratory
 colaboratory = False

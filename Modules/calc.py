@@ -13,7 +13,8 @@ History:
   13/03/2018 : Added version string 
   14/03/2018 : Added f2s and decimal formatting in printVar and printR
                Add plot support in Google Colaboratory
-  15/03/2018 : Change parameter useSci for sci in print functions             
+  15/03/2018 : Change parameter useSci for sci in print functions  
+               Correction on f2s  
 '''
 
 # Python 2.7 compatibility
@@ -24,7 +25,7 @@ import numpy as np               # Import numpy for numeric calculations
 import pylab as pl               # Import pylab
 import matplotlib.pyplot as plt
 
-version = '15/3/2018'
+version = '15/3/2018-B'
 
 # Define normal mode outside colaboratory
 colaboratory = False
@@ -53,7 +54,7 @@ def f2s(v,nd=None):
         if (a<1): ndec = int(np.floor(nd-np.log10(a)))
 
     # Check for significance
-    v2 = v
+    v2 = np.floor(v*10**ndec)/(10**ndec)
     for i in range(0,ndec):
         if np.floor(v2) == v2:
             ndec = i+1

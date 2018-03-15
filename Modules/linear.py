@@ -15,6 +15,7 @@ History:
                Added version string
                Help comments are now Python help compatible
   15/03/2018 : Add of substraction overload operator             
+               Add autorange for the frequencies of bode
 '''
 
 # Python 2.7 compatibility
@@ -26,7 +27,7 @@ try:
 except NameError:
    pass
 
-version = '15/3/2018-C'   
+version = '15/3/2018-D'   
    
 """
 @root
@@ -855,9 +856,6 @@ class linblk():
         '''Evaluate the system on a point of the s plane
           x : Complex value
         '''
-        num = self.num(x)
-        den = self.den(x)
-                  
         y = self.num(x)/self.den(x)
         return y
         
@@ -893,18 +891,28 @@ class linblk():
         res = self.weval(w)
         return res       
 
-    def showBode(self,f,title='Bode Plot'):
+    # Autorange helper function
+    def _autoRange(self):
+        min,max = self.wRange()
+        min = (min/10)/(2*np.pi)
+        max = (max*10)/(2*np.pi)    
+        fv = frange(min,max)
+        return fv    
+        
+    def showBode(self,f=None,title='Bode Plot'):
         '''Shows the bode plot of the system
           f : Frequency vector
         '''        
+        if f == None: f=self._autoRange()
         mag, phase = self.bode(f)
         drawBodePlot(f,mag,phase,title)
         
-    def addBode(self,f,label=None):
+    def addBode(self,f=None,label=None):
         '''Add the bode plot to the current image
           f : Frequency vector
         Use showBodePlot() to see the final image  
         '''
+        if f == None: f=self._autoRange() 
         mag, phase = self.bode(f)
         addBodePlot(f,mag,phase,label=label)    
             
@@ -1018,12 +1026,20 @@ class linblk():
         '''Returns the range in the complex domain that includes
         all the poles and zeros
         '''
-        list = np.append(self.poles(),self.zeros())
-        ReMin = np.amin(np.real(list))
-        ReMax = np.amax(np.real(list))
-        ImMin = np.amin(np.imag(list))
-        ImMax = np.amax(np.imag(list))
+        li = np.array(list(self.poles()[:]) + list(self.zeros()[:]))
+        ReMin = np.amin(np.real(li))
+        ReMax = np.amax(np.real(li))
+        ImMin = np.amin(np.imag(li))
+        ImMax = np.amax(np.imag(li))
         return ReMin + ImMin*1j , ReMax + ImMax*1j
+        
+    def wRange(self):        
+        li = np.array(list(self.poles()[:]) + list(self.zeros()[:]))
+        if len(li) == 0: return None
+        li = np.abs(li)
+        li = [x for x in li if x!=0.0]
+        return min(li),max(li)
+                
         
     def plotSplane(self,zmax=100.0):
         '''Plots the magnitude of the evaluation of the

@@ -14,6 +14,7 @@ History:
                Improvement of plotting on Colaboratory
                Added version string
                Help comments are now Python help compatible
+  15/03/2018 : Add of substraction overload operator             
 '''
 
 # Python 2.7 compatibility
@@ -25,7 +26,7 @@ try:
 except NameError:
    pass
 
-version = '15/3/2018-B'   
+version = '15/3/2018-C'   
    
 """
 @root
@@ -791,7 +792,17 @@ class linblk():
         obj = linblk()
         obj.num = self.num * other.den
         obj.den = self.den * other.num
-        return obj        
+        return obj  
+
+    def __truediv__(self,other):
+        '''Division operator (/)
+        Returns a cascade of the first system with
+        the second one changing poles to zeros
+        '''
+        obj = linblk()
+        obj.num = self.num * other.den
+        obj.den = self.den * other.num
+        return obj          
         
     def __add__(self,other):
         '''Addition operator (+)
@@ -802,6 +813,16 @@ class linblk():
         obj.num = (self.num * other.den) + (self.den*other.num)
         obj.den = self.den * other.den
         return obj
+        
+    def __sub__(self,other):
+        '''Substraction operator (+)
+        Returns a system that whose output is the substraction of
+        two systems with the same input
+        '''    
+        obj = linblk()
+        obj.num = (self.num * other.den) - (self.den*other.num)
+        obj.den = self.den * other.den
+        return obj        
     
     def __neg__(self):
         '''Negation operator (-)
@@ -1152,7 +1173,7 @@ def linFromPZ(poles=[],zeros=[],gain=1.0,wgain=0,ingain=None):
         curr=np.abs(s.eval(1j*wgain))
         s.num = s.num * gain / curr
     else:
-        curr = s.num.coef[-1] * s.den.coef[-1]
+        curr = s.num.coef[-1] / s.den.coef[-1]
         s.num = s.num * gain /curr
     return s   
 

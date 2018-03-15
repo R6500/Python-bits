@@ -15,6 +15,8 @@ History:
                Add plot support in Google Colaboratory
   15/03/2018 : Change parameter useSci for sci in print functions  
                Correction on f2s  
+               Elimination of electronics functions that now belong to 
+               the 'electronicsDC' module
 '''
 
 # Python 2.7 compatibility
@@ -25,7 +27,7 @@ import numpy as np               # Import numpy for numeric calculations
 import pylab as pl               # Import pylab
 import matplotlib.pyplot as plt
 
-version = '15/3/2018-B'
+version = '15/3/2018-C'
 
 # Define normal mode outside colaboratory
 colaboratory = False
@@ -104,21 +106,6 @@ def printVar(name,value,unit="",sci=True,prefix=True):
         print(name + " = " + f2sci(value,unit,prefix=prefix))
     else:
         print(name + " = " + f2s(value) + " " + unit)
-    
-
-def printR(name,value,sci=True,prefix=True):
-    """
-    Print a resistor value
-    -1.0 means infinite
-    """
-    if value == -1.0:
-        print(name + " = Open")
-        return
-    
-    if sci:
-        print(name + " = " + f2sci(value,"Ohm",prefix=prefix))
-    else:
-        print(name + " = " + f2s(value) + " Ohm")
            
 def printTitle(title):
     """
@@ -516,83 +503,5 @@ def normalizeLine(x1,y1,x2,y2):
     b = (y1*1.0 - a*x1)
     return a,b
     
-#########################################################################################
-# DC ELECTRONICS CODE                                                                   #
-#########################################################################################   
 
-'''
-Obtain Vth and Rth from a circuit
-(Va)---<Ra>---(Out)----<Rb>---(Vb)
-Returns a vector with:
-  Vth, Rth
-'''
-def divider2thevenin(va,vb,ra,rb):
-    raa=ra*1.0
-    rbb=rb*1.0
-    vth=va+(vb-va)*raa/(raa+rbb)
-    rth=raa*rbb/(raa+rbb)
-    return vth,rth
-
-'''
-Obtain a divider from the thevenin equivalent
-(Va)---<Ra>---(Out)----<Rb>---(Vb)
-Returns a vector with:
-  Ra,Rb
-A -1.0 value means infinite resistance  
-'''    
-def thevenin2divider(va,vb,vth,rth):
-    vaa=va*1.0
-    vbb=vb*1.0
-    vthh=vth*1.0
-    rthh=rth*1.0
-    
-    if vaa-vthh == 0.0:
-        rb = -1.0
-    else:    
-        rb=(rthh*vthh-vbb*rthh+(vaa-vthh)*rthh)/(vaa-vthh) 
-    
-    if vthh-vbb == 0.0:
-        ra = -1.0
-    else:    
-        ra=rb*(vaa-vthh)/(vthh-vbb)
-        
-    return ra,rb
-    
-'''
-Non inverting amplifier ----------------------------------------------------
-Obtain the values of the function:
-   Vo = A*Vi + B 
-From the components:
-   Vr : Reference voltage
-   Rs : Series resistances with Vr
-   Rf : Feedback resistance
-Returns:
-    A : Proportional constant
-    B : Zero cross constant
-'''    
-def niAmplifier(vr,rs,rf):
-    vrr=vr*1.0
-    rss=rs*1.0
-    rff=rf*1.0
-    A=1+rff/rss
-    B=-vr*rff/rss
-    return A,B
-    
-'''
-Obtain the components from the function
-Parameters:
-  A  : Proportional constant
-  B  : Zero cross constant
-  Rs : Series resistance 
-Returns: 
-  Rf : Feedback resistance
-  vr : Reference voltage 
-'''   
-def niAmplifierR(a,b,rs):
-    aa=a*1.0
-    bb=b*1.0
-    rss=rs*1.0
-    rf=rss*(aa-1)
-    vr=-bb*rss/rf
-    return rf,vr
     

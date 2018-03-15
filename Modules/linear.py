@@ -25,7 +25,7 @@ try:
 except NameError:
    pass
 
-version = '12/3/2018'   
+version = '15/3/2018-B'   
    
 """
 @root
@@ -834,6 +834,9 @@ class linblk():
         '''Evaluate the system on a point of the s plane
           x : Complex value
         '''
+        num = self.num(x)
+        den = self.den(x)
+                  
         y = self.num(x)/self.den(x)
         return y
         
@@ -1108,7 +1111,7 @@ Gain can be defined as:
 
 Returns a linblk object 
 '''        
-def linFromPZ(poles=[],zeros=[],gain=1.0,ingain=None):
+def linFromPZ(poles=[],zeros=[],gain=1.0,wgain=0,ingain=None):
     # Create new block
     s = linblk()
     '''
@@ -1133,7 +1136,7 @@ def linFromPZ(poles=[],zeros=[],gain=1.0,ingain=None):
     s.den=P.Polynomial(P.polyfromroots(poles))
     #if len(zeros):
     s.num=P.Polynomial(P.polyfromroots(zeros))
-    print(s.den,s.num)
+    #print(s.den,s.num)
     # Add gain  
     '''    
     curr = s.num.coef[0]/s.den.coef[0]
@@ -1145,7 +1148,8 @@ def linFromPZ(poles=[],zeros=[],gain=1.0,ingain=None):
         s.num = s.num * gain / curr
     '''
     if ingain == None:
-        curr = s.gain()
+        #curr = s.gain()
+        curr=np.abs(s.eval(1j*wgain))
         s.num = s.num * gain / curr
     else:
         curr = s.num.coef[-1] * s.den.coef[-1]

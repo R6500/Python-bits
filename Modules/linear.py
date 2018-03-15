@@ -27,7 +27,7 @@ try:
 except NameError:
    pass
 
-version = '15/3/2018-D'   
+version = '15/3/2018-E'   
    
 """
 @root
@@ -903,7 +903,7 @@ class linblk():
         '''Shows the bode plot of the system
           f : Frequency vector
         '''        
-        if f == None: f=self._autoRange()
+        if f is None: f=self._autoRange()
         mag, phase = self.bode(f)
         drawBodePlot(f,mag,phase,title)
         
@@ -912,7 +912,7 @@ class linblk():
           f : Frequency vector
         Use showBodePlot() to see the final image  
         '''
-        if f == None: f=self._autoRange() 
+        if f is None: f=self._autoRange() 
         mag, phase = self.bode(f)
         addBodePlot(f,mag,phase,label=label)    
             

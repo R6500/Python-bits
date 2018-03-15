@@ -94,17 +94,17 @@ def f2sci(v,unit='',nd=3,prefix=True):
     s = s + 'E' + ('{:+d}').format(exp) + ' ' + unit
     return s    
     
-def printVar(name,value,unit="",useSci=True,prefix=True):
+def printVar(name,value,unit="",sci=True,prefix=True):
     """
     Print a variable name, value and units
     """
-    if useSci:
+    if sci:
         print(name + " = " + f2sci(value,unit,prefix=prefix))
     else:
         print(name + " = " + f2s(value) + " " + unit)
     
 
-def printR(name,value,useSci=True,prefix=True):
+def printR(name,value,sci=True,prefix=True):
     """
     Print a resistor value
     -1.0 means infinite
@@ -113,7 +113,7 @@ def printR(name,value,useSci=True,prefix=True):
         print(name + " = Open")
         return
     
-    if useSci:
+    if sci:
         print(name + " = " + f2sci(value,"Ohm",prefix=prefix))
     else:
         print(name + " = " + f2s(value) + " Ohm")

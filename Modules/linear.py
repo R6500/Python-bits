@@ -28,7 +28,7 @@ try:
 except NameError:
    pass
 
-version = '16/3/2018'   
+version = '16/3/2018-B'   
    
 """
 @root
@@ -1068,66 +1068,56 @@ class linblk():
         return min(li),max(li)
                 
         
-def plotSplane(self,zmax=100.0):
-    """
-    Plots the magnitude of the evaluation of the
-    system inside the s plane in dB(magnitude)
-    Optional parameter:
-       zmax : Maximum in Z axis (dB) (Defaults to 100 dB)
-    """
-    min,max = self.pzRange()
-    fig = lin._plotStart()
-    ax = fig.gca(projection='3d')
+    def plotSplane(self,zmax=100.0):
+        """
+        Plots the magnitude of the evaluation of the
+        system inside the s plane in dB(magnitude)
+        Optional parameter:
+        zmax : Maximum in Z axis (dB) (Defaults to 100 dB)
+        """
+        min,max = self.pzRange()
+        fig = _plotStart()
+        ax = fig.gca(projection='3d')
         
-    #plt.grid(True,color="lightgrey",linestyle='--')
-    
-    X = np.linspace(2.0*np.real(min),0.0,100)
-    Y = np.linspace(2.0*np.imag(min),2.0*np.imag(max),100)
-    X, Y = np.meshgrid(X, Y)
-    Z = np.clip(lin.dB(np.absolute(self.eval(X + 1j*Y))),0.0,zmax)
-    surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm, 
+        X = np.linspace(2.0*np.real(min),0.0,100)
+        Y = np.linspace(2.0*np.imag(min),2.0*np.imag(max),100)
+        X, Y = np.meshgrid(X, Y)
+        Z = np.clip(dB(np.absolute(self.eval(X + 1j*Y))),0.0,zmax)
+        surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm, 
                        linewidth=0, antialiased=False)
  
-    if lin.colaboratory:# For colaboratory
-        ax.set_facecolor("white") 
-    #ax.grid(True,color='black')
-    ax.xaxis.pane.set_edgecolor('black')
-    ax.yaxis.pane.set_edgecolor('black')
-    ax.zaxis.pane.set_edgecolor('black')
-    ax.xaxis.pane.fill = True
-    ax.yaxis.pane.fill = True
-    ax.zaxis.pane.fill = True
+        if colaboratory:# For colaboratory
+            ax.set_facecolor("white") 
+        ax.xaxis.pane.set_edgecolor('black')
+        ax.yaxis.pane.set_edgecolor('black')
+        ax.zaxis.pane.set_edgecolor('black')
+        ax.xaxis.pane.fill = True
+        ax.yaxis.pane.fill = True
+        ax.zaxis.pane.fill = True
     
-    # Set pane colors
-    ax.xaxis.set_pane_color((0.8, 0.9, 0.9, 1.0))
-    ax.yaxis.set_pane_color((0.9, 0.8, 0.9, 1.0))
-    ax.zaxis.set_pane_color((0.9, 0.9, 0.8, 1.0))
-    # ax.xaxis.grid(True,color='black')
+        # Set pane colors
+        ax.xaxis.set_pane_color((0.8, 0.9, 0.9, 1.0))
+        ax.yaxis.set_pane_color((0.9, 0.8, 0.9, 1.0))
+        ax.zaxis.set_pane_color((0.9, 0.9, 0.8, 1.0))
+       
+        # Improve ticks and axes legend
+        [t.set_va('center') for t in ax.get_yticklabels()]
+        [t.set_ha('left') for t in ax.get_yticklabels()]
+        [t.set_va('center') for t in ax.get_xticklabels()]
+        [t.set_ha('right') for t in ax.get_xticklabels()]
+        [t.set_va('center') for t in ax.get_zticklabels()]
+        [t.set_ha('left') for t in ax.get_zticklabels()]
     
-    ax.xaxis.line.set_color((1.0, 1.0, 1.0, 1.0)) 
-    ax.yaxis.line.set_color((0.0, 0.0, 0.0, 1.0)) 
-    ax.zaxis.line.set_color((0.0, 0.0, 0.0, 1.0))
-    
-    ax.xaxis.grid(False,color='black')
-    
-    # Improve ticks and axes legend
-    [t.set_va('center') for t in ax.get_yticklabels()]
-    [t.set_ha('left') for t in ax.get_yticklabels()]
-    [t.set_va('center') for t in ax.get_xticklabels()]
-    [t.set_ha('right') for t in ax.get_xticklabels()]
-    [t.set_va('center') for t in ax.get_zticklabels()]
-    [t.set_ha('left') for t in ax.get_zticklabels()]
-    
-    ax.contour(X, Y, Z)
+        ax.contour(X, Y, Z)
           
-    ax.view_init(30, 30)
+        ax.view_init(30, 30)
    
-    ax.set_xlabel('Real')
-    ax.set_ylabel('Imaginary')
-    ax.set_zlabel('dB')
+        ax.set_xlabel('Real')
+        ax.set_ylabel('Imaginary')
+        ax.set_zlabel('dB')
     
-    lin._subplotEnd(ax)
-    lin._plotEnd()
+        _subplotEnd(ax)
+        _plotEnd()
         
 '''  
 The bode3Dmag and bode3Dphase are currently deprecated as they are useful

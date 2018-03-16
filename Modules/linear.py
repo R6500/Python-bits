@@ -29,7 +29,7 @@ try:
 except NameError:
    pass
 
-version = '16/3/2018-C'   
+version = '16/3/2018-D'   
    
 """
 @root
@@ -1133,7 +1133,7 @@ class linblk():
         
         # Create frequency vector
         ldata = int(len(data)/2)
-        wv = np.pi*fs*np.array(list(range(0,ldata) + [x - ldata for x in range(0,ldata)]))/ldata
+        wv = np.pi*fs*np.array(list(range(0,ldata)) + [x - ldata for x in range(0,ldata)])/ldata
         
         # Calculate response  
         resp = self.weval(wv)

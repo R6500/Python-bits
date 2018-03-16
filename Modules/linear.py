@@ -17,6 +17,7 @@ History:
   15/03/2018 : Add of substraction overload operator             
                Add autorange for the frequencies of bode
   16/03/2018 : Corrections on plotSplane               
+               Added tResponse member function
 '''
 
 # Python 2.7 compatibility
@@ -28,7 +29,7 @@ try:
 except NameError:
    pass
 
-version = '16/3/2018-B'   
+version = '16/3/2018-C'   
    
 """
 @root
@@ -77,6 +78,8 @@ import matplotlib.pyplot as plt
 from matplotlib import cm                     # Colormaps
 from mpl_toolkits.mplot3d import Axes3D       # For 3D graphs
 from numpy.polynomial import polynomial as P  # Polinomial functions
+
+import calc
 
 # External files
 HELP_FILE = "Linear_Help.dat"
@@ -1067,7 +1070,6 @@ class linblk():
         li = [x for x in li if x!=0.0]
         return min(li),max(li)
                 
-        
     def plotSplane(self,zmax=100.0):
         """
         Plots the magnitude of the evaluation of the
@@ -1118,6 +1120,28 @@ class linblk():
     
         _subplotEnd(ax)
         _plotEnd()
+        
+    def tResponse(self,vt,ts=None,fs=None):
+        if fs == None:
+            if ts == None:
+                raise LinearEx('ts or fs must be provided')
+            else:
+                fs = 1/ts
+                
+        # Convert to frequency domain        
+        data = np.fft.fft(vt)
+        
+        # Create frequency vector
+        ldata = int(len(data)/2)
+        wv = np.pi*fs*np.array(list(range(0,ldata) + [x - ldata for x in range(0,ldata)]))/ldata
+        
+        # Calculate response  
+        resp = self.weval(wv)
+        
+        data = data * resp
+        # Return to time domain
+        result = np.real(np.fft.ifft(data))
+        return result        
         
 '''  
 The bode3Dmag and bode3Dphase are currently deprecated as they are useful

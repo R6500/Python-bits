@@ -16,6 +16,7 @@ History:
                Help comments are now Python help compatible
   15/03/2018 : Add of substraction overload operator             
                Add autorange for the frequencies of bode
+  16/03/2018 : Corrections on plotSplane               
 '''
 
 # Python 2.7 compatibility
@@ -27,7 +28,7 @@ try:
 except NameError:
    pass
 
-version = '15/3/2018-E'   
+version = '16/3/2018'   
    
 """
 @root
@@ -605,7 +606,7 @@ def q(pole):
 
 ######################### LINBLK CLASS ############################    
         
-'''
+"""
 @linblk
 class linblk
 Linear block class
@@ -759,122 +760,137 @@ system inside the s plane in dB(magnitude)
 The plot uses log10 of frequency in the axes
     fmax : Maximum frequency
 Returns nothing    
-'''		
+"""	
 		
 class linblk():
     def __init__(self,num=[1.0],den=[1.0]):
-        '''A new object can be created with:
+        """
+        linblk Class constructor
+        A new object can be created with:
         >> l1 = linblk()               # H(s) = 1 block
         >> l2 = linblk([1],[1,1/p1])   # H(s) = 1 / ( 1 + s/p1 )
-        ''' 
+        """ 
         self.num = P.Polynomial(num)
         self.den = P.Polynomial(den)
         
     def __str__(self):    
-        '''Using print shows the numerator and denominator
-        '''
+        """
+        Converts a linblk object to string
+        Shows the numerator and denominator
+        """
         st = str(self.num.coef) + ' / ' + str(self.den.coef)
         return st
         
     def __mul__(self,other):
-        '''Multiplication operator  (*)
+        """
+        Multiplication operator  (*)
         Returns a cascade of two systems
-        '''
+        """
         obj = linblk()
         obj.num = self.num * other.num
         obj.den = self.den * other.den
         return obj
            
     def __div__(self,other):
-        '''Division operator (/)
+        """
+        Division operator (//)
         Returns a cascade of the first system with
         the second one changing poles to zeros
-        '''
+        """
         obj = linblk()
         obj.num = self.num * other.den
         obj.den = self.den * other.num
         return obj  
 
     def __truediv__(self,other):
-        '''Division operator (/)
+        """
+        True Division operator (/)
         Returns a cascade of the first system with
         the second one changing poles to zeros
-        '''
+        """
         obj = linblk()
         obj.num = self.num * other.den
         obj.den = self.den * other.num
         return obj          
         
     def __add__(self,other):
-        '''Addition operator (+)
+        """
+        Addition operator (+)
         Returns a system that whose output is the sum of
         two systems with the same input
-        '''    
+        """    
         obj = linblk()
         obj.num = (self.num * other.den) + (self.den*other.num)
         obj.den = self.den * other.den
         return obj
         
     def __sub__(self,other):
-        '''Substraction operator (+)
+        """
+        Substraction operator (+)
         Returns a system that whose output is the substraction of
         two systems with the same input
-        '''    
+        """    
         obj = linblk()
         obj.num = (self.num * other.den) - (self.den*other.num)
         obj.den = self.den * other.den
         return obj        
     
     def __neg__(self):
-        '''Negation operator (-)
+        """
+        Negation operator (-)
         Returns a system with sign change
-        '''
+        """
         obj = linblk()
         obj.num = -self.num
         obj.den = self.den
         return obj
     
     def nf(self,other):
-        '''Negative feedback
+        """
+        Negative feedback
         Use other system to give negative feedback
-        '''
+        """
         obj = linblk()
         obj.num = self.num * other.den
         obj.den = (self.den * other.den) + (self.num * other.num)
         return obj
         
     def pf(self,other):
-        '''Positive feedback
+        """
+        Positive feedback
         Use other system to give positive feedback
-        '''    
+        """    
         obj = linblk()
         obj.num = self.num * other.den
         obj.den = (self.den * other.den) - (self.num * other.num)
         return obj        
         
     def eval(self,x):
-        '''Evaluate the system on a point of the s plane
+        """
+        Evaluate the system on a point of the s plane
           x : Complex value
-        '''
+        """
         y = self.num(x)/self.den(x)
         return y
         
     # Evaluation at jw
     def weval(self,w):
-        '''Evaluate the system on a point on the imaginary axis
+        """
+        Evaluate the system on a point on the imaginary axis
           w : Value on the j axis (Real value)
-        '''
+        """
         x = w*1j
         y = self.num(x)/self.den(x)
         return y
         
     def bode(self,f):
-        '''Generates the bode plot vector results
+        """
+        Generates the bode plot vector results
           f : Frequency vector
         Returns:  
             mag : Magnitude vector (dB)
           phase : Phase vector (deg)
-        '''    
+        """    
         w = f2w(f)
         res = self.weval(w)
         mag = dB(np.absolute(res))
@@ -882,17 +898,21 @@ class linblk():
         return mag, phase
         
     def freqR(self,f):
-        '''Generates the frequency response vector results
+        """
+        Generates the frequency response vector results
           f : Frequency vector
         Returns:  
           res : Freuency response (complex)
-        '''    
+        """    
         w = f2w(f)
         res = self.weval(w)
         return res       
 
-    # Autorange helper function
-    def _autoRange(self):
+    def autoRange(self):
+        """
+        Creates a frequency vector that includes all poles and zeros
+        Returns the frequency vector
+        """
         min,max = self.wRange()
         min = (min/10)/(2*np.pi)
         max = (max*10)/(2*np.pi)    
@@ -900,43 +920,42 @@ class linblk():
         return fv    
         
     def showBode(self,f=None,title='Bode Plot'):
-        '''Shows the bode plot of the system
+        """
+        Shows the bode plot of the system
           f : Frequency vector
-        '''        
-        if f is None: f=self._autoRange()
+        """        
+        if f is None: f=self.autoRange()
         mag, phase = self.bode(f)
         drawBodePlot(f,mag,phase,title)
         
     def addBode(self,f=None,label=None):
-        '''Add the bode plot to the current image
+        """
+        Add the bode plot to the current image
           f : Frequency vector
         Use showBodePlot() to see the final image  
-        '''
-        if f is None: f=self._autoRange() 
+        """
+        if f is None: f=self.autoRange() 
         mag, phase = self.bode(f)
         addBodePlot(f,mag,phase,label=label)    
             
     def poles(self):
-        '''Get the list of poles of the system
-        '''
-        # Code to eliminate
-        # Order in Polynomials is reverse to needed in roots
-        #return np.roots(self.den.coef[::-1])
+        """
+        Get the list of poles of the system
+        """
         return self.den.roots()
         
     def zeros(self):
-        '''Get the list of zeros of the system
-        '''
-        # Code to eliminate
-        # Order in Polynomials is reverse to needed in roots
-        #return np.roots(self.num.coef[::-1])  
+        """
+        Get the list of zeros of the system
+        """
         return self.num.roots()
 
     def gain(self):
-        '''Get the gain of the system
+        """
+        Get the gain of the system
         We define gain as the quotient of the first coef (in increase order)
         of num and den that is not zero
-        '''
+        """
         for c in self.num.coef:
             if c!= 0.0:
                 cnum = c
@@ -945,31 +964,33 @@ class linblk():
             if c!= 0.0:
                 cden = c
                 break                
-        #print str(self.num.coef)   #Remove this line
-        #print str(self.den.coef)   #Remove this line
-        # gain = self.num.coef[0] / self.den.coef[0]
         gain = cnum/cden
         return gain        
         
     def addPZplot(self,label=None,color='blue'):
-        '''Add the pole-zero plot to the current image
+        """
+        Add the pole-zero plot to the current image
         Use showPoleZeroPlot() to see the final image
-          title : Plot title (optional)
-        '''
+          label : Label for the set (optional)
+          color : Color for the set (Defaults to 'blue')
+        """
         poles = self.poles()
         zeros = self.zeros()
         addPoleZeroPlot(poles,zeros,label=label,color=color)
         
-    def showPZplot(self,title='',color='blue',location='best'): 
-        '''Add the pole-zero plot to the current image
+    def showPZplot(self,title='',color='blue'): 
+        """
+        Add the pole-zero plot to the current image
           title : Plot title (optional)
-        '''    
+          color : Simbol colors (Defaults to 'blue')
+        """    
         self.addPZplot(color=color)
-        showPoleZeroPlot(title,location)
+        showPoleZeroPlot(title)
         
     def printPZ(self):
-        '''Show poles and zeros on screen
-        '''
+        """
+        Show poles and zeros on screen
+        """
         poles = self.poles()
         zeros = self.zeros()
         gain = self.gain()
@@ -978,12 +999,13 @@ class linblk():
         print('Gain : '  + str(gain))
         
     def clean(self,ratio=1000.0):
-        '''Eliminates poles and zeros that cancel each other
+        """
+        Eliminates poles and zeros that cancel each other
         A pole and a zero are considered equal if their distance
         is lower than 1/ratio its magnitude
            ratio : Ratio to cancel PZ (default = 1000)
         Return a new object   
-        '''
+        """
         gain = self.gain()
         poles = self.poles()
         zeros = self.zeros()
@@ -1023,9 +1045,10 @@ class linblk():
         return s
              
     def pzRange(self):
-        '''Returns the range in the complex domain that includes
+        """
+        Returns the range in the complex domain that includes
         all the poles and zeros
-        '''
+        """
         li = np.array(list(self.poles()[:]) + list(self.zeros()[:]))
         ReMin = np.amin(np.real(li))
         ReMax = np.amax(np.real(li))
@@ -1033,7 +1056,11 @@ class linblk():
         ImMax = np.amax(np.imag(li))
         return ReMin + ImMin*1j , ReMax + ImMax*1j
         
-    def wRange(self):        
+    def wRange(self):      
+        """
+        Returns the angula frequency range that includes all poles and zeros
+        that are not zero
+        """        
         li = np.array(list(self.poles()[:]) + list(self.zeros()[:]))
         if len(li) == 0: return None
         li = np.abs(li)
@@ -1041,39 +1068,78 @@ class linblk():
         return min(li),max(li)
                 
         
-    def plotSplane(self,zmax=100.0):
-        '''Plots the magnitude of the evaluation of the
-        system inside the s plane in dB(magnitude)
-           zmax : Maximum in Z axis (dB)
-        '''
-        min,max = self.pzRange()
-        fig = _plotStart()
-        #fig = plt.figure(facecolor="white")    # White border
-        ax = fig.gca(projection='3d')
-        X = np.linspace(1.5*np.real(min),0.0,100)
-        Y = np.linspace(1.5*np.imag(min),1.5*np.imag(max),100)
-        X, Y = np.meshgrid(X, Y)
-        Z = np.clip(dB(np.absolute(self.eval(X + 1j*Y))),0.0,zmax)
-        surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm, 
+def plotSplane(self,zmax=100.0):
+    """
+    Plots the magnitude of the evaluation of the
+    system inside the s plane in dB(magnitude)
+    Optional parameter:
+       zmax : Maximum in Z axis (dB) (Defaults to 100 dB)
+    """
+    min,max = self.pzRange()
+    fig = lin._plotStart()
+    ax = fig.gca(projection='3d')
+        
+    #plt.grid(True,color="lightgrey",linestyle='--')
+    
+    X = np.linspace(2.0*np.real(min),0.0,100)
+    Y = np.linspace(2.0*np.imag(min),2.0*np.imag(max),100)
+    X, Y = np.meshgrid(X, Y)
+    Z = np.clip(lin.dB(np.absolute(self.eval(X + 1j*Y))),0.0,zmax)
+    surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm, 
                        linewidth=0, antialiased=False)
  
-        ax.contour(X, Y, Z)
+    if lin.colaboratory:# For colaboratory
+        ax.set_facecolor("white") 
+    #ax.grid(True,color='black')
+    ax.xaxis.pane.set_edgecolor('black')
+    ax.yaxis.pane.set_edgecolor('black')
+    ax.zaxis.pane.set_edgecolor('black')
+    ax.xaxis.pane.fill = True
+    ax.yaxis.pane.fill = True
+    ax.zaxis.pane.fill = True
+    
+    # Set pane colors
+    ax.xaxis.set_pane_color((0.8, 0.9, 0.9, 1.0))
+    ax.yaxis.set_pane_color((0.9, 0.8, 0.9, 1.0))
+    ax.zaxis.set_pane_color((0.9, 0.9, 0.8, 1.0))
+    # ax.xaxis.grid(True,color='black')
+    
+    ax.xaxis.line.set_color((1.0, 1.0, 1.0, 1.0)) 
+    ax.yaxis.line.set_color((0.0, 0.0, 0.0, 1.0)) 
+    ax.zaxis.line.set_color((0.0, 0.0, 0.0, 1.0))
+    
+    ax.xaxis.grid(False,color='black')
+    
+    # Improve ticks and axes legend
+    [t.set_va('center') for t in ax.get_yticklabels()]
+    [t.set_ha('left') for t in ax.get_yticklabels()]
+    [t.set_va('center') for t in ax.get_xticklabels()]
+    [t.set_ha('right') for t in ax.get_xticklabels()]
+    [t.set_va('center') for t in ax.get_zticklabels()]
+    [t.set_ha('left') for t in ax.get_zticklabels()]
+    
+    ax.contour(X, Y, Z)
+          
+    ax.view_init(30, 30)
+   
+    ax.set_xlabel('Real')
+    ax.set_ylabel('Imaginary')
+    ax.set_zlabel('dB')
+    
+    lin._subplotEnd(ax)
+    lin._plotEnd()
         
-        #ax.set_xlabel('Real')
-        #ax.set_ylabel('Imaginary')
-        #ax.set_zlabel('dB')
-
-        #plt.show()
-        _subplotEnd(ax)
-        _plotEnd()
-        
+'''  
+The bode3Dmag and bode3Dphase are currently deprecated as they are useful
+  
     def bode3Dmag(self,fmax=None,zmax=100.0):
-        '''Plots the magnitude of the evaluation of the
+        """
+        Plots the magnitude of the evaluation of the
         system inside the s plane in dB(magnitude)
         The plot uses log10 of frequency in the axes
            fmax : Maximum frequency
            zmax : Maximum in Z axis (dB)
-        '''
+        """
         if fmax is None:
             min,max = self.pzRange()
             fmax = np.max([np.absolute(np.real(min))
@@ -1096,16 +1162,18 @@ class linblk():
         ax.set_xlabel('Real (decade)')
         ax.set_ylabel('Imaginary (decade)')
         ax.set_zlabel('dB')
+        ax.view_init(30, 30)
 
         plt.show()     
 
     def bode3Dphase(self,fmax=None):
-        '''Plots the phase of the evaluation of the
+        """
+        Plots the phase of the evaluation of the
         system inside the s plane in dB(magnitude)
         The plot uses log10 of frequency in the axes
            fmax : Maximum frequency
            zmax : Maximum in Z axis (dB)
-        '''
+        """
         if fmax is None:
             min,max = self.pzRange()
             fmax = np.max([np.absolute(np.real(min))
@@ -1128,62 +1196,35 @@ class linblk():
         ax.set_xlabel('Real (decade)')
         ax.set_ylabel('Imaginary (decade)')
         ax.set_zlabel('Phase')
-
+        ax.view_init(30, 30)
+        
         plt.show()         
+'''        
         
 ################# HELPER SYSTEM FUNCTIONS ########################
 
-'''
-@linFromPZ
-linFromPZ(poles,zeros,gain,ingain)
-Creates a system from the list of poles and zeros
-
-Parameters:
-  poles : List of poles
-  zeros : List of zeros 
-
-Gain can be defined as:
-   gain : Gain defined as the quotient of first num/den coef.
-  igain : Gain defined at infinite freq. in high pass 
-
-Returns a linblk object 
-'''        
 def linFromPZ(poles=[],zeros=[],gain=1.0,wgain=0,ingain=None):
+    """
+    @linFromPZ
+    linFromPZ(poles,zeros,gain,ingain)
+    Creates a system from the list of poles and zeros
+
+    Parameters:
+      poles : List of poles
+      zeros : List of zeros 
+
+    Gain can be defined as:
+      gain : Gain defined as the quotient of first num/den coef.
+     wgain : Frequency where gain is defined 
+     igain : Gain defined at infinite freq. in high pass 
+
+    Returns a linblk object 
+    """        
     # Create new block
     s = linblk()
-    '''
-    # Removed this code as polyfromroots is easier
-    
-    # Add poles
-    for pole in poles:
-        if pole == 0.0:
-            poly = P.Polynomial([0,1])
-        else:
-            poly = P.Polynomial([1,-1/pole])
-        s.den = s.den * poly
-    # Add zeros    
-    for zero in zeros:
-        if zero == 0.0:
-            poly = P.Polynomial([0,1])
-        else:
-            poly = P.Polynomial([1,-1/zero])
-        s.num = s.num * poly
-    ''' 
-    #if len(poles):
     s.den=P.Polynomial(P.polyfromroots(poles))
-    #if len(zeros):
     s.num=P.Polynomial(P.polyfromroots(zeros))
-    #print(s.den,s.num)
     # Add gain  
-    '''    
-    curr = s.num.coef[0]/s.den.coef[0]
-    if curr == 0:
-        # There is a 0 zero
-        s.num = s.num *gain*s.den.coef[0]
-    else:
-        # There is no 0 zero
-        s.num = s.num * gain / curr
-    '''
     if ingain == None:
         #curr = s.gain()
         curr=np.abs(s.eval(1j*wgain))
@@ -1193,19 +1234,19 @@ def linFromPZ(poles=[],zeros=[],gain=1.0,wgain=0,ingain=None):
         s.num = s.num * gain /curr
     return s   
 
-'''
-@poleZeroPolar
-poleZeroPolar(mag,angle)
-Generates a list of two poles or zeros from
-their magnitude and angle on the s plane
-
-Required parameters:
-    mag : magnitude
-  angle : angle of one pole or zero (0 to 90)
-  
-Returns a list of two poles or zeros
-'''	
 def poleZeroPolar(mag,angle):
+    """
+    @poleZeroPolar
+    poleZeroPolar(mag,angle)
+    Generates a list of two poles or zeros from
+    their magnitude and angle on the s plane
+
+    Required parameters:
+       mag : magnitude
+     angle : angle of one pole or zero (0 to 90)
+  
+    Returns a list of two poles or zeros
+    """	
     radians = angle * np.pi / 180.0
     p1 = -mag*np.cos(radians) + 1j*mag*np.sin(radians)
     p2 = -mag*np.cos(radians) - 1j*mag*np.sin(radians)
@@ -1215,11 +1256,11 @@ def poleZeroPolar(mag,angle):
             
 ####################### PREDEFINED SYSTEMS ###################
 
-'''
+"""
 @lin1
 lin1
 Identity system H(s)=1
-'''
+"""
 
 # Linear indentiy system H(s) = 1
 lin1 = linblk()

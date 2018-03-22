@@ -18,6 +18,7 @@ History:
                Add autorange for the frequencies of bode
   16/03/2018 : Corrections on plotSplane               
                Added tResponse member function
+  22/03/2018 : Added addBodeFromComplex and drawBodeFromComplex
 '''
 
 # Python 2.7 compatibility
@@ -29,7 +30,7 @@ try:
 except NameError:
    pass
 
-version = '16/3/2018-D'   
+version = '22/03/2018'   
    
 """
 @root
@@ -428,6 +429,25 @@ def addBodePlot(f,mag,phase,label=''):
     bodePhases.append(phase)
     bodeLabels.append(label)
 
+def addBodeFromComplex(f,vector,label=''):
+    """
+    @addBodeFromComplex
+    addBodeFromComplex(f,vector,label)
+    Adds a new bode plot
+    Useful to show different Bode curves together
+
+    Required parameters:
+       f : Frequency vector (Hz)
+       v : Complex vector
+  
+    Optional parameters:  
+      label : Label for the curve (Defaults to no label)
+
+    Returns nothing
+  
+    See also showBodePlot	
+    """  
+    addBodePlot(f,dB(np.abs(vector)),np.angle(vector,deg=True),label)	
 	
 def showBodePlot(title='Bode Plot',location='best'):  
     """"
@@ -486,6 +506,24 @@ def drawBodePlot(f,mag,phase,title='Bode Plot'):
     addBodePlot(f,mag,phase)
     showBodePlot(title)
 
+def drawBodeFromComplex(f,v,title='Bode Plot'):
+    """
+    @drawBodeFromComplex
+    drawBodeFromComplex(f,v,title)
+    Draws a bode plot
+
+    Required parameters:
+        f : Frequency vector (Hz)
+        v : Complex vector
+  
+    Optional parameters:  
+      title : Plot title
+  
+    Returns nothing  
+    """
+    addBodeFromComplex(f,v)
+    showBodePlot(title)	
+	
 #################### S PLOT HELPER FUNCTIONS ######################
 
 # Global variables

@@ -22,7 +22,11 @@ verbose = False
 
 class circuitEx(Exception):
     def __init__(self, msg=""):
+        print('**')
+        print('** Circuit exception')
+        print('**')
         print('** ' + msg) 
+        print('**')
         print("\n")    
 
 # GLOBAL OPERATIONS ########################################################################
@@ -660,7 +664,7 @@ class circuit():
      
 # SOLVING THE CIRCUIT #############################################################################
      
-    def solveCircuit(self):
+    def solve(self):
         """
         Solve a circuit
         """

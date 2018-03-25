@@ -14,7 +14,7 @@ from __future__ import division
 # Needed imports
 import sympy
 
-version='25/03/2018-B'
+version='25/03/2018-C'
 
 verbose = False
 
@@ -677,8 +677,8 @@ class circuit():
         Substitute values in solution
         """       
         self.subSol = {}
-        for key in self.solution:
-            self.subSol[key] = self.solution[key].subs(self.subsDic)  
+        for key in self.nSolution:
+            self.subSol[key] = self.nSolution[key].subs(self.subsDic)  
         if verbose:
             print('Circuit solution with substitutions:')
             print('    ',self.subSol)        

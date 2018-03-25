@@ -80,8 +80,6 @@ from matplotlib import cm                     # Colormaps
 from mpl_toolkits.mplot3d import Axes3D       # For 3D graphs
 from numpy.polynomial import polynomial as P  # Polinomial functions
 
-import calc
-
 # External files
 HELP_FILE = "Linear_Help.dat"
 

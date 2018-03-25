@@ -14,7 +14,7 @@ from __future__ import division
 # Needed imports
 import sympy
 
-version='25/03/2018'
+version='25/03/2018-B'
 
 verbose = False
 
@@ -50,10 +50,12 @@ class circuit():
         """
         Constructor to start a new circuit from zero
         """
-        self.components = []
-        self.subsDic = {}
-        self.meas = {}
-        self.subSol = None
+        self.components = []   # List of components in the circuit
+        self.subsDic = {}      # Substitution dictionary for values
+        self.meas = {}         # Dictionary of measurement objects
+        self.solution = None   # Analytical solution
+        self.subSol = None     # Nummeric or "s" solution 
+        self.sDic = {}         # Simbol dictionary for unknowns
         if verbose:
             print('Starting a new circuit')
    
@@ -173,6 +175,8 @@ class circuit():
         # Create unknow for the current
         isy = sympy.Symbol('i'+name)
         dict['isy'] = isy
+        # Add entry to symbol dictionary
+        self.sDic[isy] = 'i'+name
         # Add entry to list of components
         self.components.append(dict)
         # Add entry to substitution dictionary
@@ -231,6 +235,8 @@ class circuit():
         dict['n1'] = node1
         dict['n2'] = node2
         dict['sy'] = sy
+        # Add entry to symbol dictionary
+        self.sDic[sy] = name
         # Add entry to list of components
         self.components.append(dict)
         # Add entry to measurement elements
@@ -257,6 +263,8 @@ class circuit():
         dict['n1'] = node1
         dict['n2'] = node2
         dict['sy'] = sy
+        # Add entry to symbol dictionary
+        self.sDic[sy] = name
         # Add entry to list of components
         self.components.append(dict)
         # Add entry to measurement elements
@@ -293,6 +301,8 @@ class circuit():
         # Create unknow for the current
         isy = sympy.Symbol('i'+name)
         dict['isy'] = isy
+        # Add entry to symbol dictionary
+        self.sDic[isy] = 'i'+name
         # Add entry to list of components
         self.components.append(dict)
         # Add entry to substitution dictionary
@@ -385,6 +395,8 @@ class circuit():
                 ns = sympy.Symbol(name)
                 self.nodeVars[node] = ns
                 self.unknowns.add(ns)
+                # Add entry to symbol dictionary
+                self.sDic[ns] = name
                 if verbose:
                     print('    ',name)    
         if not zeroFound:
@@ -651,6 +663,15 @@ class circuit():
             print('Circuit solution:')
             print('    ',self.solution)
             
+    def _nameSolution(self):
+        """
+        Convert solution to use names as keys
+        """        
+        self.nSolution = {}
+        for sym in self.solution:
+            key = self.sDic[sym]
+            self.nSolution[key] = self.solution[sym]
+            
     def _substituteSolution(self):
         """
         Substitute values in solution
@@ -695,9 +716,11 @@ class circuit():
             self._showEquations()
         # Solve the circuit equations for the unknowns    
         self._solveEquations()
+        # Generate solution with names instead of symbols
+        self._nameSolution()
         # Substitute values in the solution
         self._substituteSolution()
-        return self.solution
+        return self.nSolution
         
     def subs(self):
         """

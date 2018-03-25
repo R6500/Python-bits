@@ -13,8 +13,9 @@ from __future__ import division
 
 # Needed imports
 import sympy
+import numpy as np
 
-version='25/03/2018-C'
+version='25/03/2018-D'
 
 verbose = False
 
@@ -728,4 +729,17 @@ class circuit():
         """  
         return self.subSol       
 
-        
+# HELPER FUNCTIONS #############################################################################
+
+def evalList(expr,var,set):
+    """
+    Evaluate a sympy expression in a set of values
+    """
+    return np.array([complex((expr.subs(var,x)).evalf()) for x in set])
+    
+def evalFreqs(expr,set):    
+    """
+    Evaluate a sympy expression in a set of frequencies (Hz) for 's' symbols
+    """
+    return evalList(expr,s,1j*2.0*np.pi*set)
+    

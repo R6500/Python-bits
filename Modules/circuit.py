@@ -15,7 +15,7 @@ from __future__ import division
 import sympy
 import numpy as np
 
-version='25/03/2018-D'
+version='25/03/2018-E'
 
 verbose = False
 
@@ -56,7 +56,8 @@ class circuit():
         self.meas = {}         # Dictionary of measurement objects
         self.solution = None   # Analytical solution
         self.subSol = None     # Nummeric or "s" solution 
-        self.sDic = {}         # Simbol dictionary for unknowns
+        self.sDic = {}         # Simbol dictionary
+        self.nDic = {}         # Name dictionary
         if verbose:
             print('Starting a new circuit')
    
@@ -85,6 +86,8 @@ class circuit():
         dict['sy'] = sy
         # Add entry to list of components
         self.components.append(dict)
+        # Add to name dictionary
+        self.nDic[name] = sy
         # Add entry to substitution dictionary
         if value != None:
             self.subsDic[sy] = value
@@ -115,6 +118,8 @@ class circuit():
         dict['sy'] = sy
         # Add entry to list of components
         self.components.append(dict)
+        # Add to name dictionary
+        self.nDic[name] = sy
         # Add entry to substitution dictionary
         if value != None:
             self.subsDic[sy] = value
@@ -145,6 +150,8 @@ class circuit():
         dict['sy'] = sy
         # Add entry to list of components
         self.components.append(dict)
+        # Add to name dictionary
+        self.nDic[name] = sy
         # Add entry to substitution dictionary
         if value != None:
             self.subsDic[sy] = value
@@ -178,6 +185,9 @@ class circuit():
         dict['isy'] = isy
         # Add entry to symbol dictionary
         self.sDic[isy] = 'i'+name
+        # Add to name dictionary
+        self.nDic[name] = sy
+        self.nDic['i'+name] = isy
         # Add entry to list of components
         self.components.append(dict)
         # Add entry to substitution dictionary
@@ -210,6 +220,8 @@ class circuit():
         dict['sy'] = sy
         # Add entry to list of components
         self.components.append(dict)
+        # Add to name dictionary
+        self.nDic[name] = sy
         # Add entry to substitution dictionary
         if value != None:
             self.subsDic[sy] = value
@@ -238,6 +250,8 @@ class circuit():
         dict['sy'] = sy
         # Add entry to symbol dictionary
         self.sDic[sy] = name
+        # Add to name dictionary
+        self.nDic[name] = sy
         # Add entry to list of components
         self.components.append(dict)
         # Add entry to measurement elements
@@ -266,6 +280,8 @@ class circuit():
         dict['sy'] = sy
         # Add entry to symbol dictionary
         self.sDic[sy] = name
+        # Add to name dictionary
+        self.nDic[name] = sy
         # Add entry to list of components
         self.components.append(dict)
         # Add entry to measurement elements
@@ -304,6 +320,9 @@ class circuit():
         dict['isy'] = isy
         # Add entry to symbol dictionary
         self.sDic[isy] = 'i'+name
+        # Add to name dictionary
+        self.nDic[name] = sy
+        self.nDic['i'+name] = isy
         # Add entry to list of components
         self.components.append(dict)
         # Add entry to substitution dictionary
@@ -343,6 +362,8 @@ class circuit():
         dict['ctr'] = ctr
         # Add entry to list of components
         self.components.append(dict)
+        # Add to name dictionary
+        self.nDic[name] = sy
         # Add entry to substitution dictionary
         if value != None:
             self.subsDic[sy] = value
@@ -398,6 +419,8 @@ class circuit():
                 self.unknowns.add(ns)
                 # Add entry to symbol dictionary
                 self.sDic[ns] = name
+                # Add to name dictionary
+                self.nDic[name] = ns
                 if verbose:
                     print('    ',name)    
         if not zeroFound:
@@ -564,6 +587,13 @@ class circuit():
                 n1 = cm['n1']
                 n2 = cm['n2']
                 if   n1 == 0:
+                    self.equations.append(sympy.Eq(cm['sy'],-self.nodeVars[n2]))
+                elif n2 == 0:
+                    self.equations.append(sympy.Eq(cm['sy'],self.nodeVars[n1]))
+                else:
+                    self.equations.append(sympy.Eq(cm['sy'],self.nodeVars[n1]-self.nodeVars[n2]))
+                """
+                if   n1 == 0:
                     self._substEqs(self.nodeVars[n2],cm['sy'])
                     self.unknowns.remove(self.nodeVars[n2])
                     self.nodeVars[n2]=cm['sy']
@@ -573,6 +603,7 @@ class circuit():
                     self.nodeVars[n1]=cm['sy']
                 else:
                     self.equations.append(sympy.Eq(cm['sy'],self.nodeVars[n1]-self.nodeVars[n2])) 
+                """    
                 
     def _processVM(self):
         """

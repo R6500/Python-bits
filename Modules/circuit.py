@@ -8,6 +8,7 @@ History:
   26/03/2018 : Adding components now return the associated symbols
                Correct error in VM processing
                Change in some class member names
+               Add Latex support with the show command
 '''
 
 # Python 2.7 compatibility
@@ -18,9 +19,14 @@ from __future__ import division
 import sympy
 import numpy as np
 
-version='26/03/2018-D'
+#from sympy.printing import latex
+from IPython.display import display, Math
+
+version='26/03/2018-E'
 
 verbose = False
+
+latex = False
 
 # EXCEPTION CODE ###########################################################################
 
@@ -47,7 +53,28 @@ def setVerbose(flag=True):
     """
     global verbose
     verbose = flag
+    
+def setLatex(flag=True):
+    """
+    Set module to be use Latex in the show command
+    Module starts not using Latex
+    Parameter:
+       flag : Use LAtex? (Defaults to True)
+    """
+    global latex
+    latex = flag    
 
+def show(x):
+    """
+    Show an expression
+    Uses latex if enabled
+    """ 
+    if latex:
+        display(Math(sympy.printing.latex(x)))
+    else:
+        print(x)    
+        
+    
 class circuit():
 
     def __init__(self):

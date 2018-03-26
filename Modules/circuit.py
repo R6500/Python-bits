@@ -17,7 +17,7 @@ from __future__ import division
 import sympy
 import numpy as np
 
-version='26/03/2018-B'
+version='26/03/2018-C'
 
 verbose = False
 
@@ -208,7 +208,7 @@ class circuit():
                 print('Voltage supply',name,'added between nodes',node1,'and',node2,'with value',value)
             else:
                 print('Voltage supply',name,'added between nodes',node1,'and',node2)  
-        return sy,isy        
+        return sy       
 
     def addI(self,name,node1,node2,value=None): 
         """
@@ -351,7 +351,7 @@ class circuit():
                 print('VcVs',name,'added between nodes',node1,'and',node2,'with value',value)
             else:
                 print('VcVs',name,'added between nodes',node1,'and',node2)
-        return sy,isy        
+        return sy      
             
     def addCIS(self,name,node1,node2,cont,value=None): 
         """

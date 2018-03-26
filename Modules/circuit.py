@@ -5,6 +5,7 @@ Module to solve electrical circuits
 
 History:
   25/03/2018 : First version
+  26/03/2018 : Adding components now return the associated symbols
 '''
 
 # Python 2.7 compatibility
@@ -15,7 +16,7 @@ from __future__ import division
 import sympy
 import numpy as np
 
-version='25/03/2018-E'
+version='26/03/2018'
 
 verbose = False
 
@@ -54,8 +55,9 @@ class circuit():
         self.components = []   # List of components in the circuit
         self.subsDic = {}      # Substitution dictionary for values
         self.meas = {}         # Dictionary of measurement objects
-        self.solution = None   # Analytical solution
-        self.subSol = None     # Nummeric or "s" solution 
+        self.solution = None   # Analytical solution /key = symbols)
+        self.nSolution = None  # Analytical solution (key = names)
+        self.subSol = None     # Nummeric or "s" solution (key = names)
         self.sDic = {}         # Simbol dictionary
         self.nDic = {}         # Name dictionary
         if verbose:
@@ -73,6 +75,7 @@ class circuit():
             node1 : First node
             node2 : Second node
             value : Value of the resistor (Defaults to None)
+        Return the resistor symbol    
         """    
         # Define a symbol for the resistor
         sy = sympy.Symbol(name)
@@ -96,6 +99,7 @@ class circuit():
                 print('Resistor',name,'added between nodes',node1,'and',node2,'with value',value)
             else:
                 print('Resistor',name,'added between nodes',node1,'and',node2) 
+        return sy        
                 
     def addC(self,name,node1,node2,value=None):
         """
@@ -105,6 +109,7 @@ class circuit():
             node1 : First node
             node2 : Second node
             value : Value of the capacitor (Defaults to None)
+        Return the capacitor symbol    
         """    
         # Define a symbol for the capacitor
         sy = sympy.Symbol(name)
@@ -127,7 +132,8 @@ class circuit():
             if value:
                 print('Capcitor',name,'added between nodes',node1,'and',node2,'with value',value)
             else:
-                print('Capacitor',name,'added between nodes',node1,'and',node2)                 
+                print('Capacitor',name,'added between nodes',node1,'and',node2)  
+        return sy        
 
     def addL(self,name,node1,node2,value=None):
         """
@@ -137,6 +143,7 @@ class circuit():
             node1 : First node
             node2 : Second node
             value : Value of the inductor (Defaults to None)
+        Return the inductor symbol    
         """    
         # Define a symbol for the inductor
         sy = sympy.Symbol(name)
@@ -160,6 +167,7 @@ class circuit():
                 print('Inductor',name,'added between nodes',node1,'and',node2,'with value',value)
             else:
                 print('Inductor',name,'added between nodes',node1,'and',node2)                 
+        return sy        
                 
     def addV(self,name,node1,node2,value=None): 
         """
@@ -169,6 +177,7 @@ class circuit():
             node1 : First node  (+)
             node2 : Second node (-)
             value : Value of the supply (Defaults to None)
+        Return the source symbol and the current symbol    
         """    
         # Define a symbol for the supply
         sy = sympy.Symbol(name)
@@ -197,7 +206,8 @@ class circuit():
             if value:
                 print('Voltage supply',name,'added between nodes',node1,'and',node2,'with value',value)
             else:
-                print('Voltage supply',name,'added between nodes',node1,'and',node2)   
+                print('Voltage supply',name,'added between nodes',node1,'and',node2)  
+        return sy,isy        
 
     def addI(self,name,node1,node2,value=None): 
         """
@@ -207,6 +217,7 @@ class circuit():
             node1 : First node  (+)
             node2 : Second node (-)
             value : Value of the supply (Defaults to None)
+        Return the source symbol    
         """ 
         # Define a symbol for the supply
         sy = sympy.Symbol(name)
@@ -229,7 +240,8 @@ class circuit():
             if value:
                 print('Current supply',name,'added between nodes',node1,'and',node2,'with value',value)
             else:
-                print('Current supply',name,'added between nodes',node1,'and',node2)            
+                print('Current supply',name,'added between nodes',node1,'and',node2)    
+        return sy        
     
     def addVM(self,name,node1,node2): 
         """
@@ -238,6 +250,7 @@ class circuit():
              name : Name of the unknown to add
             node1 : First node  (+)
             node2 : Second node (-)
+        Return the measurement symbol    
         """    
         # Define a symbol for the unknown
         sy = sympy.Symbol(name)
@@ -258,6 +271,7 @@ class circuit():
         self.meas[name] = dict
         if verbose:
             print('Voltage measurement',name,'added between nodes',node1,'and',node2)
+        return sy    
             
     def addIM(self,name,node1,node2): 
         """
@@ -268,6 +282,7 @@ class circuit():
              name : Name of the unknown to add
             node1 : First node  (+)
             node2 : Second node (-)
+        Return the measurement symbol    
         """    
         # Define a symbol for the unknown
         sy = sympy.Symbol(name)
@@ -287,7 +302,8 @@ class circuit():
         # Add entry to measurement elements
         self.meas[name] = dict
         if verbose:
-            print('Current measurement',name,'added between nodes',node1,'and',node2)            
+            print('Current measurement',name,'added between nodes',node1,'and',node2)   
+        return sy            
     
     def addCVS(self,name,node1,node2,cont,value=None):
         """
@@ -298,6 +314,7 @@ class circuit():
             node2 : Second node (-)
              cont : Coltroller name
             value : Value of the proportionality constant (Defaults to None)
+        Return the CVS symbol and the current on the source    
         """    
         # Check the controller
         try:
@@ -333,6 +350,7 @@ class circuit():
                 print('VcVs',name,'added between nodes',node1,'and',node2,'with value',value)
             else:
                 print('VcVs',name,'added between nodes',node1,'and',node2)
+        return sy,isy        
             
     def addCIS(self,name,node1,node2,cont,value=None): 
         """
@@ -343,6 +361,7 @@ class circuit():
             node2 : Second node (-)
              cont : Coltroller name
             value : Value of the supply (Defaults to None)
+        Return the CIS symbol    
         """ 
         # Check the controller
         try:
@@ -371,7 +390,8 @@ class circuit():
             if value:
                 print('Current supply',name,'added between nodes',node1,'and',node2,'with value',value)
             else:
-                print('Current supply',name,'added between nodes',node1,'and',node2)            
+                print('Current supply',name,'added between nodes',node1,'and',node2)      
+        return sy         
             
 # INTERNAL FUNCTIONS TO SOLVE THE CIRCUI ###################################################### 
 

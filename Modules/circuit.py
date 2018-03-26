@@ -7,6 +7,7 @@ History:
   25/03/2018 : First version
   26/03/2018 : Adding components now return the associated symbols
                Correct error in VM processing
+               Change in some class member names
 '''
 
 # Python 2.7 compatibility
@@ -17,7 +18,7 @@ from __future__ import division
 import sympy
 import numpy as np
 
-version='26/03/2018-C'
+version='26/03/2018-D'
 
 verbose = False
 
@@ -56,11 +57,11 @@ class circuit():
         self.components = []   # List of components in the circuit
         self.subsDic = {}      # Substitution dictionary for values
         self.meas = {}         # Dictionary of measurement objects
-        self.solution = None   # Analytical solution /key = symbols)
-        self.nSolution = None  # Analytical solution (key = names)
-        self.subSol = None     # Nummeric or "s" solution (key = names)
-        self.sDic = {}         # Simbol dictionary
-        self.nDic = {}         # Name dictionary
+        self.sSolution = None  # Analytical solution (key = symbols)
+        self.solution = None   # Analytical solution (key = names)
+        self.particular = None # Nummeric or "s" solution (key = names)
+        self.name = {}         # Name dictionary with symbols for keys
+        self.symbol = {}       # Symbol dictionary with name keys
         if verbose:
             print('Starting a new circuit')
    
@@ -91,7 +92,7 @@ class circuit():
         # Add entry to list of components
         self.components.append(dict)
         # Add to name dictionary
-        self.nDic[name] = sy
+        self.symbol[name] = sy
         # Add entry to substitution dictionary
         if value != None:
             self.subsDic[sy] = value
@@ -125,7 +126,7 @@ class circuit():
         # Add entry to list of components
         self.components.append(dict)
         # Add to name dictionary
-        self.nDic[name] = sy
+        self.symbol[name] = sy
         # Add entry to substitution dictionary
         if value != None:
             self.subsDic[sy] = value
@@ -159,7 +160,7 @@ class circuit():
         # Add entry to list of components
         self.components.append(dict)
         # Add to name dictionary
-        self.nDic[name] = sy
+        self.symbol[name] = sy
         # Add entry to substitution dictionary
         if value != None:
             self.subsDic[sy] = value
@@ -194,10 +195,10 @@ class circuit():
         isy = sympy.Symbol('i'+name)
         dict['isy'] = isy
         # Add entry to symbol dictionary
-        self.sDic[isy] = 'i'+name
+        self.name[isy] = 'i'+name
         # Add to name dictionary
-        self.nDic[name] = sy
-        self.nDic['i'+name] = isy
+        self.symbol[name] = sy
+        self.symbol['i'+name] = isy
         # Add entry to list of components
         self.components.append(dict)
         # Add entry to substitution dictionary
@@ -233,7 +234,7 @@ class circuit():
         # Add entry to list of components
         self.components.append(dict)
         # Add to name dictionary
-        self.nDic[name] = sy
+        self.symbol[name] = sy
         # Add entry to substitution dictionary
         if value != None:
             self.subsDic[sy] = value
@@ -263,9 +264,9 @@ class circuit():
         dict['n2'] = node2
         dict['sy'] = sy
         # Add entry to symbol dictionary
-        self.sDic[sy] = name
+        self.name[sy] = name
         # Add to name dictionary
-        self.nDic[name] = sy
+        self.symbol[name] = sy
         # Add entry to list of components
         self.components.append(dict)
         # Add entry to measurement elements
@@ -295,9 +296,9 @@ class circuit():
         dict['n2'] = node2
         dict['sy'] = sy
         # Add entry to symbol dictionary
-        self.sDic[sy] = name
+        self.name[sy] = name
         # Add to name dictionary
-        self.nDic[name] = sy
+        self.symbol[name] = sy
         # Add entry to list of components
         self.components.append(dict)
         # Add entry to measurement elements
@@ -337,10 +338,10 @@ class circuit():
         isy = sympy.Symbol('i'+name)
         dict['isy'] = isy
         # Add entry to symbol dictionary
-        self.sDic[isy] = 'i'+name
+        self.name[isy] = 'i'+name
         # Add to name dictionary
-        self.nDic[name] = sy
-        self.nDic['i'+name] = isy
+        self.symbol[name] = sy
+        self.symbol['i'+name] = isy
         # Add entry to list of components
         self.components.append(dict)
         # Add entry to substitution dictionary
@@ -383,7 +384,7 @@ class circuit():
         # Add entry to list of components
         self.components.append(dict)
         # Add to name dictionary
-        self.nDic[name] = sy
+        self.symbol[name] = sy
         # Add entry to substitution dictionary
         if value != None:
             self.subsDic[sy] = value
@@ -439,9 +440,9 @@ class circuit():
                 self.nodeVars[node] = ns
                 self.unknowns.add(ns)
                 # Add entry to symbol dictionary
-                self.sDic[ns] = name
+                self.name[ns] = name
                 # Add to name dictionary
-                self.nDic[name] = ns
+                self.symbol[name] = ns
                 if verbose:
                     print('    ',name)    
         if not zeroFound:
@@ -711,30 +712,30 @@ class circuit():
         """
         if verbose:
             print('Unknowns:',self.unknowns)
-        self.solution = sympy.solve(self.equations,list(self.unknowns))
+        self.sSolution = sympy.solve(self.equations,list(self.unknowns))
         if verbose:
             print('Circuit solution:')
-            print('    ',self.solution)
+            print('    ',self.sSolution)
             
     def _nameSolution(self):
         """
         Convert solution to use names as keys
         """        
-        self.nSolution = {}
-        for sym in self.solution:
-            key = self.sDic[sym]
-            self.nSolution[key] = self.solution[sym]
+        self.solution = {}
+        for sym in self.sSolution:
+            key = self.name[sym]
+            self.solution[key] = self.sSolution[sym]
             
     def _substituteSolution(self):
         """
         Substitute values in solution
         """       
-        self.subSol = {}
-        for key in self.nSolution:
-            self.subSol[key] = self.nSolution[key].subs(self.subsDic)  
+        self.particular = {}
+        for key in self.solution:
+            self.particular[key] = self.solution[key].subs(self.subsDic)  
         if verbose:
             print('Circuit solution with substitutions:')
-            print('    ',self.subSol)        
+            print('    ',self.particular)        
      
 # SOLVING THE CIRCUIT #############################################################################
      
@@ -773,13 +774,13 @@ class circuit():
         self._nameSolution()
         # Substitute values in the solution
         self._substituteSolution()
-        return self.nSolution
+        return self.solution
         
     def subs(self):
         """
         Give solution after substituting component values
         """  
-        return self.subSol       
+        return self.particular       
 
 # HELPER FUNCTIONS #############################################################################
 

@@ -6,6 +6,7 @@ Module to solve electrical circuits
 History:
   25/03/2018 : First version
   26/03/2018 : Adding components now return the associated symbols
+               Correct error in VM processing
 '''
 
 # Python 2.7 compatibility
@@ -16,7 +17,7 @@ from __future__ import division
 import sympy
 import numpy as np
 
-version='26/03/2018'
+version='26/03/2018-B'
 
 verbose = False
 
@@ -640,7 +641,7 @@ class circuit():
                 n1 = cm['n1']
                 n2 = cm['n2']
                 if   n1 == 0:
-                    self._substEqs(self.nodeVars[n2],cm['sy'])
+                    self._substEqs(self.nodeVars[n2],-cm['sy'])
                     try:
                         self.unknowns.remove(self.nodeVars[n2])
                     except KeyError:

@@ -23,7 +23,7 @@ import numpy as np
 #from sympy.printing import latex
 from IPython.display import display, Math
 
-version='26/03/2018-E'
+version='28/03/2018'
 
 verbose = False
 

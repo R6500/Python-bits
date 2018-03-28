@@ -816,7 +816,6 @@ def expr2func(expr,*vars):
     """
     Convert an expression to a function
     """
-    print(vars)
     return sympy.lambdify(vars,expr)
 
 def evalList(expr,var,set):

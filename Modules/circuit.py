@@ -23,7 +23,7 @@ import numpy as np
 #from sympy.printing import latex
 from IPython.display import display, Math
 
-version='28/03/2018'
+version='28/03/2018-B'
 
 verbose = False
 
@@ -741,9 +741,6 @@ class circuit():
         if verbose:
             print('Unknowns:',self.unknowns)
         self.sSolution = sympy.solve(self.equations,list(self.unknowns))
-        if verbose:
-            print('Circuit solution:')
-            print('    ',self.sSolution)
             
     def _nameSolution(self):
         """
@@ -753,6 +750,9 @@ class circuit():
         for sym in self.sSolution:
             key = self.name[sym]
             self.solution[key] = self.sSolution[sym]
+        if verbose:
+            print('Circuit solution:')
+            print('    ',self.solution)    
             
     def _substituteSolution(self):
         """

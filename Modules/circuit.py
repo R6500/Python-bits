@@ -9,6 +9,7 @@ History:
                Correct error in VM processing
                Change in some class member names
                Add Latex support with the show command
+  28/03/2018 : Add expr2func function             
 '''
 
 # Python 2.7 compatibility
@@ -811,11 +812,20 @@ class circuit():
 
 # HELPER FUNCTIONS #############################################################################
 
+def expr2func(expr,*vars):
+    """
+    Convert an expression to a function
+    """
+    print(vars)
+    return sympy.lambdify(vars,expr)
+
 def evalList(expr,var,set):
     """
     Evaluate a sympy expression in a set of values
     """
-    return np.array([complex((expr.subs(var,x)).evalf()) for x in set])
+    f = expr2func(expr,var)
+    return np.array(f(np.array(set)))
+    #return np.array([complex((expr.subs(var,x)).evalf()) for x in set])
     
 def evalFreqs(expr,set):    
     """

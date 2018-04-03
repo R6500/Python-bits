@@ -7,8 +7,6 @@ History:
    3/04/2018 : First version
 '''
 
-version = '3/04/2018'
-
 # Python 2.7 compatibility
 from __future__ import print_function
 from __future__ import division
@@ -16,6 +14,7 @@ from __future__ import division
 # Basic imports
 import numpy as np
 
+version = '3/04/2018'
 
 # Exception code ######################################################
 

@@ -15,7 +15,7 @@ from __future__ import division
 # Basic imports
 import numpy as np
 
-version = '4/04/2018-G'
+version = '4/04/2018-H'
 
 # Exception code ######################################################
 
@@ -266,13 +266,21 @@ class uVar:
         self.name = name            
         return                        
       
+    # Generate unit from uVar ---------------------------------------------------
+
+    def makeUnit(self,name,sci=False):
+        self.scale = self.scale*self.value
+        self.value = 1.0
+        self.name = name
+        self.complex = not sci
+      
     # Unit conversion -----------------------------------------------------------
 
     def convert(self,other):
         """
         Convert to another compatible unit
         """ 
-        if not self.compatible(other):
+        if not self.check(other):
             raise unitsEx('Cannot convert to incompatible unit')
         name   = other.name
         value  = self.value*self.scale/other.scale 
@@ -294,13 +302,15 @@ class uVar:
         else:
             return False
           
-    def compatible(self,other):
+    def check(self,other):
         """
         Returns True if object has compatible units with other
+        It can be used in assert
+        assert object.check(unit)
         """
         if np.array_equal(self.vector,other.vector):
             return True
-        return False
+        return False             
         
     def same_units(self,other):
         """
@@ -323,7 +333,7 @@ class uVar:
         """
         # If other is uVar instance
         if isinstance(other,uVar):
-            if not self.compatible(other):
+            if not self.check(other):
                 raise unitsEx('Incompatible units') 
             if self.same_units(other):
                 value = self.value+other.value
@@ -518,7 +528,7 @@ class uVar:
         Gives result in give units
         Raises exception if units don't match
         """
-        if not self.compatible(unit):
+        if not self.check(unit):
             message = 'Units are not compatible'
             raise unitsEx(message)
         value = self.value*self.scale/unit.scale
@@ -537,7 +547,7 @@ class uVar:
             if self.complex:
                 prefix = False    
             return f2sci(self.value,self.name,prefix=prefix,sep=sep)
-        if not self.compatible(unit):
+        if not self.check(unit):
             message = 'Units are not compatible'
             raise unitsEx(message)    
         new = self.convert(unit)    
@@ -704,29 +714,23 @@ u_lx.set_name('lx')
 
 # Non SI units ################################################################
 
-u_in = u_m*1.0  # Inch
-u_in.scale = 25.4e-3
-u_in.set_name('in',True)
+u_in = 25.4e-3*u_m
+u_in.makeUnit('in')
 
-u_mil = u_m*1.0  # mils
-u_mil.scale = 25.4e-6
-u_mil.set_name('mil',True)
+u_mil = u_in/1000  # mils
+u_mil.makeUnit('mil')
 
-u_cm = u_m*1.0 # cm
-u_cm.scale = 0.01
-u_cm.set_name('cm',True)
+u_cm = u_m/100 # cm
+u_cm.makeUnit('cm')
 
-u_eV = u_J*1.0 # eV
-u_eV.scale = 1.6e-19
-u_eV.set_name('eV')
+u_eV = 1.6e-19*u_J # eV
+u_eV.makeUnit('eV')
 
-u_Ang = u_m*1.0 # Angstrom
-u_Ang.scale = 1e-10
-u_Ang.set_name('Ang',True)
+u_Ang = 1e-10*u_m # Angstrom
+u_Ang.makeUnit('Ang')
 
-u_g = u_kg*1.0 # gram
-u_g.scale = 0.001
-u_g.set_name('g')
+u_g = u_kg/1000 # gram
+u_g.makeUnit('g')
 
 # Phisics constants ###########################################################
 

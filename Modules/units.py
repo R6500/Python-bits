@@ -5,6 +5,7 @@ Module to work with S.I. units
 
 History:
    3/04/2018 : First version
+   4/04/2018 : Addition of non S.I. units and Physics constants
 '''
 
 # Python 2.7 compatibility
@@ -14,7 +15,7 @@ from __future__ import division
 # Basic imports
 import numpy as np
 
-version = '3/04/2018'
+version = '4/04/2018'
 
 # Exception code ######################################################
 
@@ -73,7 +74,7 @@ def f2s(v,nd=None):
     # Return string
     return ('{0:.%df}' % ndec).format(v)
    
-def f2sci(v,unit='',nd=3,prefix=True):
+def f2sci(v,unit='',nd=3,prefix=True,sep=''):
     """
     Takes one float and converts it to scientific notation
     Required parameters
@@ -82,6 +83,7 @@ def f2sci(v,unit='',nd=3,prefix=True):
         unit : Unit to show
           nd : Number of decimal places (Default to 3) 
       prefix : Use standard prefixes for powers of 10 up to +/-18
+         sep : Separator between prefix and unit (Defaults to none)
     """
     potH=['k','M','G','T','P','E']
     potL=['m','u','n','p','f','a']
@@ -96,10 +98,10 @@ def f2sci(v,unit='',nd=3,prefix=True):
       
     if (prefix):
         if 1 <= pot <=6:
-            s = s + ' ' + potH[pot-1] + unit
+            s = s + ' ' + potH[pot-1] + sep + unit
             return s
         if 1 <= -pot <=6:
-            s = s + ' '+ potL[-pot-1] + unit
+            s = s + ' '+ potL[-pot-1] + sep + unit
             return s
     
     s = s + 'E' + ('{:+d}').format(exp) + ' ' + unit
@@ -118,7 +120,8 @@ def printVar(name,value,unit="",sci=True,prefix=True):
 
 class uVar:
   
-    # Constructor
+    # Constructor -----------------------------------------------------
+    
     def __init__(self,name,vector,value=1.0):
         """
         uVar constructor
@@ -137,6 +140,7 @@ class uVar:
         self.name   = name              # Name of the units
         self.complex = False            # No single name for units
         
+    # Get internal elements ----------------------------------------------------- 
         
     def value(self):
         """
@@ -150,18 +154,23 @@ class uVar:
         """
         return self.vector
       
-    def set_name(self,name):
-        """
-        Set the name of the object units
-        """
-        self.name=name
-        self.complex = False
-      
     def name(self):
         """
         Return the name of the object units
         """
-        return self.name
+        return self.name  
+    
+    # Set internal elements -----------------------------------------------------
+    
+    def set_name(self,name,complex=False):
+        """
+        Set the name of the object units
+        If complex is false (default) power of 10 prefixed could be used
+        """
+        self.name=name
+        self.complex = complex
+      
+    # Private methods -----------------------------------------------------------
       
     def _construct_name(self): 
         """
@@ -179,6 +188,21 @@ class uVar:
                 if self.vector[i] != 1:
                     name = name + '^' + str(self.vector[i])
         return name     
+      
+    # Unit conversion -----------------------------------------------------------
+
+    '''
+    def convert(self,other):
+        """
+        Convert to another compatible unit
+        """ 
+        if not self.same_units(other):
+            raise unitsEx('Cannot convert to incompatible unit')
+        name = other.name
+        value =         
+    '''    
+      
+    # Logic checks -------------------------------------------------------------- 
       
     def is_none(self):
         """
@@ -200,7 +224,7 @@ class uVar:
         else:  
             return False
                 
-    # Aritmetic operations        
+    # Aritmetic operations -----------------------------------------------------       
         
     def __add__(self,other):
         """
@@ -379,7 +403,7 @@ class uVar:
         name = ''
         return uVar(name,vector,value)
       
-    # Printing and representation  
+    # Printing and representation ----------------------------------------------------- 
       
     def __str__(self):
         """
@@ -399,25 +423,26 @@ class uVar:
         value = self.value/unit.value
         return str(value)+' '+unit.name
       
-    def sci(self,unit=None,prefix=True):
+    def sci(self,unit=None,prefix=True,sep=''):
         """
         Gives result in sci notation
         Optional parameters:
            unit   : Units to use (Default own units)
            prefix : Use power of 10 prefixes (Default to True)
+           sep    : Separator between prefix and unit (Defaults to none)
         Power of 10 prefixes won't be used in composed units    
         """
         if unit is None:
             if self.complex:
                 prefix = False
-            return f2sci(self.value,self.name,prefix=prefix)
+            return f2sci(self.value,self.name,prefix=prefix,sep=sep)
         if not self.same_units(unit):
             message = 'Units is not ' + unit.name
             raise unitsEx(message)    
         value = self.value/unit.value  
         if unit.complex:
             prefix = False
-        return f2sci(value,unit.name,prefix=prefix)    
+        return f2sci(value,unit.name,prefix=prefix,sep=sep)    
    
   
 # Unary non dimensionless functions ########################################
@@ -551,6 +576,9 @@ u_C.set_name('C')
 u_V    = u_W/u_A        # volt
 u_V.set_name('V')
 
+u_F    = u_C/u_V        # farad
+u_F.set_name('F')
+
 u_ohm  = u_V/u_A        # ohm
 u_ohm.set_name('ohm')
 
@@ -567,11 +595,55 @@ u_H    = u_Wb/u_A       # henry
 u_H.set_name('H')
 
 u_dC   = u_K*1.0        # celsius
-u_dC.set_name('ºC')
+u_dC.set_name('?C')
 
 u_lm   = u_cd*1.0       # lumen
 u_lm.set_name('lm')
 
 u_lx   = u_lm/u_m/u_m   # lux
 u_lx.set_name('lx')
+
+# Non SI units ################################################################
+
+u_in = 25.4e-3*u_m    # Inch
+u_in.set_name('in',True)
+
+u_mil = u_in/1000     # mils
+u_mil.set_name('mil',True)
+
+u_cm = u_m/100 # cm
+u_cm.set_name('cm',True)
+
+u_eV = 1.6e-19 *u_J # eV
+u_eV.set_name('eV')
+
+u_Ang = 1e-10 * u_m # Angstrom
+u_Ang.set_name('Ang',True)
+
+u_g = u_kg / 1000 # gram
+u_g.set_name('g')
+
+# Phisics constants ###########################################################
+
+# Electron charge
+c_q = 1.6e-19 * u_C 
+
+# Vacuum permitivity
+c_e0 = 8.85e-14 * u_F/u_cm
+
+# Boltzman constant
+c_k = 8.62e-5 * u_eV/u_K
+
+# Plank constant
+c_h = 6.63e-34 * u_J * u_s
+
+# Electron mass (steady)
+c_m0 = 9.11e-31 * u_kg
+
+# Gravity constant
+c_G = 6.674e-11 * u_N*u_m**2/u_kg**2
+
+# Gravital acceleration
+c_g = 9.80665 * u_m/u_s**2
+
 

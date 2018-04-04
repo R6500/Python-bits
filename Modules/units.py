@@ -15,7 +15,7 @@ from __future__ import division
 # Basic imports
 import numpy as np
 
-version = '4/04/2018'
+version = '4/04/2018-B'
 
 # Exception code ######################################################
 
@@ -107,14 +107,28 @@ def f2sci(v,unit='',nd=3,prefix=True,sep=''):
     s = s + 'E' + ('{:+d}').format(exp) + ' ' + unit
     return s    
     
-def printVar(name,value,unit="",sci=True,prefix=True):
+def printVar(name,value,unit="",sci=True,prefix=True,sep=''):
     """
     Print a variable name, value and units
     """
+    # Code if value is not an uVar object
+    if not isinstance(value,uVar):
+        if sci:
+            print(name + " = " + f2sci(value,unit,prefix=prefix,sep=sep))
+        else:
+            print(name + " = " + f2s(value) + " " + unit)
+        return
+
+    # Code if value is a uVar object
+    if unit != "" and not isinstance(unit,uVar):
+        raise unitsEx('If value is an uVar object, unit shall be of the same kind')    
+    if unit != "":
+        value=value.convert(unit)
+            
     if sci:
-        print(name + " = " + f2sci(value,unit,prefix=prefix))
+        print(name + " = " + value.sci(prefix=prefix,sep=sep))
     else:
-        print(name + " = " + f2s(value) + " " + unit)
+        print(name + " = " + str(value))    
 
 # uVar class #########################################################
 
@@ -191,16 +205,25 @@ class uVar:
       
     # Unit conversion -----------------------------------------------------------
 
-    '''
     def convert(self,other):
         """
         Convert to another compatible unit
         """ 
         if not self.same_units(other):
             raise unitsEx('Cannot convert to incompatible unit')
-        name = other.name
-        value =         
-    '''    
+        name   = other.name
+        value  = self.value/other.value 
+        vector = self.vector
+        return uVar(name,vector,value)
+    
+        if not self.same_units(unit):
+            message = 'Units is not ' + unit.name
+            raise unitsEx(message)    
+            
+        value = self.value/unit.value  
+        if unit.complex:
+            prefix = False
+        return f2sci(value,unit.name,prefix=prefix,sep=sep)   
       
     # Logic checks -------------------------------------------------------------- 
       
@@ -410,7 +433,7 @@ class uVar:
         Basic conversion to string
         Just gives the value followed by the units name
         """
-        return str(self.value)+' '+self.name+' '      
+        return f2s(self.value)+' '+self.name      
       
     def strUnit(self,unit):
         """
@@ -421,7 +444,7 @@ class uVar:
             message = 'Units is not ' + unit.name
             raise unitsEx(message)
         value = self.value/unit.value
-        return str(value)+' '+unit.name
+        return str(value)+' '+unit.name  
       
     def sci(self,unit=None,prefix=True,sep=''):
         """

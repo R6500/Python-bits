@@ -15,7 +15,7 @@ from __future__ import division
 # Basic imports
 import numpy as np
 
-version = '4/04/2018-J'
+version = '4/04/2018-K'
 
 # Exception code ######################################################
 
@@ -279,10 +279,15 @@ class uVar:
     # Generate unit from uVar ---------------------------------------------------
 
     def makeUnit(self,name,sci=False):
+        """
+        Convert the self object in a new unit
+        Returns itself
+        """
         self.scale = self.scale*self.value
         self.value = 1.0
         self.name = name
         self.complex = not sci
+        return self
       
     # Unit conversion -----------------------------------------------------------
 

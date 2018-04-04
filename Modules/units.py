@@ -15,7 +15,7 @@ from __future__ import division
 # Basic imports
 import numpy as np
 
-version = '4/04/2018-F'
+version = '4/04/2018-G'
 
 # Exception code ######################################################
 
@@ -58,10 +58,12 @@ def f2s(v,nd=None):
     if nd == None:
         ndec = 3
         if (a>=1000): ndec = 2
-        if (a<1): ndec = int(np.floor(3-np.log10(a)))
+        if (a<1): 
+            if a!=0: ndec = int(np.floor(3-np.log10(a)))
     else:
         ndec = nd
-        if (a<1): ndec = int(np.floor(nd-np.log10(a)))
+        if (a<1):
+            if a!=0: ndec = int(np.floor(nd-np.log10(a)))
 
     # Check for significance
     v2 = np.floor(v*10**ndec)/(10**ndec)
@@ -692,7 +694,7 @@ u_H    = u_Wb/u_A       # henry
 u_H.set_name('H')
 
 u_dC   = u_K*1.0        # celsius
-u_dC.set_name('?C')
+u_dC.set_name('dC')
 
 u_lm   = u_cd*1.0       # lumen
 u_lm.set_name('lm')

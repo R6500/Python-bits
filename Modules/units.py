@@ -15,7 +15,7 @@ from __future__ import division
 # Basic imports
 import numpy as np
 
-version = '4/04/2018-D'
+version = '4/04/2018-F'
 
 # Exception code ######################################################
 
@@ -136,7 +136,7 @@ class uVar:
   
     # Constructor -----------------------------------------------------
     
-    def __init__(self,name,vector,value=1.0):
+    def __init__(self,name,vector,value=1.0,scale=1.0):
         """
         uVar constructor
         uVar(name,vector,value=1.0)
@@ -145,6 +145,7 @@ class uVar:
           name   : Name of the units
           vector : Vector of base units exponents
           value  : Numeric value (defaults to 1.0)
+          scale  : Scaling factor from S.I. units
         Returns a new uVar object
         """
         if len(vector)!=7:
@@ -153,6 +154,7 @@ class uVar:
         self.value  = value             # Numerical value
         self.name   = name              # Name of the units
         self.complex = False            # No single name for units
+        self.scale = scale              # Scaling factor for this unit
         
     # Get internal elements ----------------------------------------------------- 
         
@@ -204,11 +206,17 @@ class uVar:
                     name = name + '^' + str(self.vector[i])
         return name  
 
-    def _construct_name(self):
+    def _reconstruct(self):
         """
         Private function
-        Return a new complex name from the base units exponents
+        Reconstruct the own name from base units
         """
+        # Remove the scaling
+        self.value = self.value * self.scale
+        self.scale = 1.0
+        
+        self.complex = False
+        
         name =''
         num = False
         den = False
@@ -217,24 +225,31 @@ class uVar:
             if self.vector[i]<0: den = True     
         if not num:
             if not den:
-                name = ''
-                return name
+                self.name = ''
+                return
             name += '1'
+            self.complex = True
         else:
             first = True
+            nSubs = 0
             for i in range(0,nbase):
                 exponent = self.vector[i] 
                 if exponent == int(exponent): exponent = int(exponent)                
                 if exponent>0:
+                    if exponent > 1: self.complex = True
+                    nSubs += 1
                     if not first:
                         name = name + '*'
                     first = False
                     name = name + v_names[i]
                     if self.vector[i] != 1:
                         name = name + '^' + str(exponent)
+            if nSubs > 1: self.complex = True           
         if not den:
-            return name
-        name += '/'  
+            self.name = name
+            return
+        name += '/' 
+        self.complex = True        
         first = True
         for i in range(0,nbase): 
             exponent = self.vector[i]   
@@ -246,7 +261,8 @@ class uVar:
                 name = name + v_names[i]
                 if self.vector[i] != -1:
                     name = name + '^' + str(-exponent)  
-        return name                    
+        self.name = name            
+        return                        
       
     # Unit conversion -----------------------------------------------------------
 
@@ -254,22 +270,16 @@ class uVar:
         """
         Convert to another compatible unit
         """ 
-        if not self.same_units(other):
+        if not self.compatible(other):
             raise unitsEx('Cannot convert to incompatible unit')
         name   = other.name
-        value  = self.value/other.value 
+        value  = self.value*self.scale/other.scale 
         vector = self.vector
-        return uVar(name,vector,value)
-    
-        if not self.same_units(unit):
-            message = 'Units is not ' + unit.name
-            raise unitsEx(message)    
-            
-        value = self.value/unit.value  
-        if unit.complex:
-            prefix = False
-        return f2sci(value,unit.name,prefix=prefix,sep=sep)   
-      
+        scale = other.scale
+        res = uVar(name,vector,value,scale)
+        if other.complex: res.complex = True
+        return res
+           
     # Logic checks -------------------------------------------------------------- 
       
     def is_none(self):
@@ -282,15 +292,23 @@ class uVar:
         else:
             return False
           
-    def same_units(self,other):
+    def compatible(self,other):
         """
-        Returns True if object has same units as other one
+        Returns True if object has compatible units with other
         """
-        # Returns true if both have the same units
         if np.array_equal(self.vector,other.vector):
             return True
-        else:  
+        return False
+        
+    def same_units(self,other):
+        """
+        Returns True if object has same units as other
+        """
+        if not np.array_equal(self.vector,other.vector):
             return False
+        if self.scale != other.scale:
+            return False
+        return True                 
                 
     # Aritmetic operations -----------------------------------------------------       
         
@@ -301,23 +319,25 @@ class uVar:
         Raises exception is units are not the same
         Returns a new uVar object
         """
+        # If other is uVar instance
         if isinstance(other,uVar):
-            if not self.same_units(other):
-                raise unitsEx('Inconsistent units')   
-            value = self.value+other.value    
-            if self.name == other.name:
-                name = self.name
-                res = uVar(name,self.vector,value)
+            if not self.compatible(other):
+                raise unitsEx('Incompatible units') 
+            if self.same_units(other):
+                value = self.value+other.value
+                res = uVar(self.name,self.vector,value,self.scale)
+                return res
             else:
-                name = self._construct_name()
-                res = uVar(name,self.vector,value)
-                res.complex = True
-            return res
-        else:
-            if not self.is_none():
-                raise unitsEx('Cannot add dimensionless value')
-            value = self.value + other    
-            return uVar('',self.vector,value)
+                value = self.value*self.scale + other.value*other.scale
+                res = uVar('?',self.vector,value)
+                res._reconstruct()
+                return res                
+
+        # If other is not uVar instance        
+        if not self.is_none():
+            raise unitsEx('Cannot add dimensionless value')
+        value = self.value*self.scale + other    
+        return uVar('',self.vector,value)
           
     def __radd__(self,other):
         """
@@ -333,7 +353,7 @@ class uVar:
         new = -self
         Returns a new uVar object
         """
-        return uVar(self.name,self.vector,-self.value)
+        return uVar(self.name,self.vector,-self.value,self.scale)
         
     def __sub__(self,other):
         """
@@ -358,23 +378,32 @@ class uVar:
         new = self * other
         Returns a new uVar object
         """
+        # If other is uVar instance
         if isinstance(other,uVar):
             value = self.value*other.value
             vector = self.vector+other.vector
             if self.is_none():
                 name = other.name
-            elif other.is_none():
+                scale = other.scale
+                res = uVar(name,vector,value,scale)
+                return res
+            if other.is_none():
                 name = self.name
-            else:    
-                name = '?'  
-        else:
-            value  = self.value*other
-            vector = self.vector
-            name   = self.name
-        res = uVar(name,vector,value)
-        if res.name == '?':
-            res.name = res._construct_name()
-            res.complex = True
+                scale = self.scale
+                res = uVar(name,vector,value,scale)
+                return res
+             
+            value = value*self.scale*other.scale
+            res = uVar('?',vector,value)
+            res._reconstruct()
+            return res            
+                
+        # If other is noy uVar instance
+        value  = self.value*other
+        vector = self.vector
+        name   = self.name
+        scale  = self.scale
+        res = uVar(name,vector,value,scale)
         return res
             
     def __rmul__(self,other):
@@ -391,24 +420,33 @@ class uVar:
         new = self/other
         Returns a new uVar object
         """
+        # If other is uVar instance
         if isinstance(other,uVar):
-            value = self.value/other.value
             vector = self.vector-other.vector
             if self.is_none():
-                name = other.name
-            elif other.is_none():
+                value = self.value*self.scale/(other.value*other.scale)
+                res = uVar('?',vector,value)
+                res._reconstruct()
+                return res
+            if other.is_none():
+                value = self.value/other.value
                 name = self.name
-            else:    
-                name = '?'  
-        else:
-            value  = self.value/other
-            vector = self.vector
-            name   = self.name
-        res = uVar(name,vector,value)
-        if res.name == '?':
-            res.name = res._construct_name()
-            res.complex = True
-        return res 
+                scale = self.scale
+                res = uVar(name,vector,value,scale)
+                return res
+             
+            value = self.value*self.scale/other.scale
+            res = uVar('?',vector,value)
+            res._reconstruct()
+            return res            
+                
+        # If other is not uVar instance
+        value  = self.value/other
+        vector = self.vector
+        name   = self.name
+        scale  = self.scale
+        res = uVar(name,vector,value,scale)
+        return res
       
     def __rtruediv__(self,other):
         """
@@ -416,16 +454,10 @@ class uVar:
         new = other/self
         Returns a new uVar object
         """
-        if isinstance(other,uVar):
-            return other.__truediv__(self)
-        else:
-            value  = other/self.value
-            vector = -self.vector
-            name   = '?'
-        res = uVar(name,vector,value)
-        if res.name == '?':
-            res.name = res._construct_name()
-            res.complex = True
+        value  = other/(self.value*self.scale)
+        vector = -self.vector
+        res = uVar('?',vector,value)
+        res._reconstruct()
         return res   
       
     def __abs__(self):
@@ -437,7 +469,8 @@ class uVar:
         name = self.name
         vector = self.vector
         value = abs(self.value)
-        return uVar(name,vector,value)
+        scale = self.scale
+        return uVar(name,vector,value,scale)
       
     def __pow__(self,other):
         """
@@ -450,12 +483,10 @@ class uVar:
                 other = other.value
             else:
                 raise unitsEx('Exponents must be dimensionless')
-        name = '?'        
-        value = self.value**other     
+        value = (self.value*self.scale)**other     
         vector = self.vector*other
-        res = uVar(name,vector,value)
-        res.name = res._construct_name()
-        res.complex = True
+        res = uVar('?',vector,value)
+        res._reconstruct()
         return res
       
     def __rpow__(self,other):
@@ -465,8 +496,8 @@ class uVar:
         Returns a new uVar object
         """
         if not self.is_none():
-            raise unitsEx('Exponents must be dimensionless')
-        value = other**self.value
+            raise unitsEx('Exponents must be dimensionless')    
+        value = other**(self.value*self.scale)
         vector = self.vector
         name = ''
         return uVar(name,vector,value)
@@ -485,10 +516,10 @@ class uVar:
         Gives result in give units
         Raises exception if units don't match
         """
-        if not self.same_units(unit):
-            message = 'Units is not ' + unit.name
+        if not self.compatible(unit):
+            message = 'Units are not compatible'
             raise unitsEx(message)
-        value = self.value/unit.value
+        value = self.value*self.scale/unit.scale
         return str(value)+' '+unit.name  
       
     def sci(self,unit=None,prefix=True,sep=''):
@@ -502,15 +533,15 @@ class uVar:
         """
         if unit is None:
             if self.complex:
-                prefix = False
+                prefix = False    
             return f2sci(self.value,self.name,prefix=prefix,sep=sep)
-        if not self.same_units(unit):
-            message = 'Units is not ' + unit.name
+        if not self.compatible(unit):
+            message = 'Units are not compatible'
             raise unitsEx(message)    
-        value = self.value/unit.value  
-        if unit.complex:
+        new = self.convert(unit)    
+        if new.complex:
             prefix = False
-        return f2sci(value,unit.name,prefix=prefix,sep=sep)    
+        return f2sci(new.value,new.name,prefix=prefix,sep=sep)    
    
   
 # Unary non dimensionless functions ########################################
@@ -522,12 +553,10 @@ def sqrt(var):
     """
     if not isinstance(var,uVar):
         return function(var)
-    value = np.sqrt(var.value)
-    name = '?'
+    value = np.sqrt(var.value*var.scale)
     vector = var.vector/2
-    res = uVar(name,vector,value)
-    res.name = res._construct_name()
-    res.complex = True
+    res = uVar('?',vector,value)
+    res._reconstruct()
     return res 
   
 # Unary dimensionless functions ############################################
@@ -673,22 +702,28 @@ u_lx.set_name('lx')
 
 # Non SI units ################################################################
 
-u_in = 25.4e-3*u_m    # Inch
+u_in = u_m*1.0  # Inch
+u_in.scale = 25.4e-3
 u_in.set_name('in',True)
 
-u_mil = u_in/1000     # mils
+u_mil = u_m*1.0  # mils
+u_mil.scale = 25.4e-6
 u_mil.set_name('mil',True)
 
-u_cm = u_m/100 # cm
+u_cm = u_m*1.0 # cm
+u_cm.scale = 0.01
 u_cm.set_name('cm',True)
 
-u_eV = 1.6e-19 *u_J # eV
+u_eV = u_J*1.0 # eV
+u_eV.scale = 1.6e-19
 u_eV.set_name('eV')
 
-u_Ang = 1e-10 * u_m # Angstrom
+u_Ang = u_m*1.0 # Angstrom
+u_Ang.scale = 1e-10
 u_Ang.set_name('Ang',True)
 
-u_g = u_kg / 1000 # gram
+u_g = u_kg*1.0 # gram
+u_g.scale = 0.001
 u_g.set_name('g')
 
 # Phisics constants ###########################################################

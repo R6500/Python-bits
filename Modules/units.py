@@ -15,7 +15,7 @@ from __future__ import division
 # Basic imports
 import numpy as np
 
-version = '4/04/2018-I'
+version = '4/04/2018-J'
 
 # Exception code ######################################################
 
@@ -569,7 +569,7 @@ class uVar:
         """
         Prints the unit as in the same way as the printVar function
         """
-        printVar(name,self,unit="",sci=True,prefix=True,sep='')
+        printVar(name,self,unit,sci,prefix,sep)
    
   
 # Unary non dimensionless functions ########################################

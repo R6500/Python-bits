@@ -15,7 +15,7 @@ from __future__ import division
 # Basic imports
 import numpy as np
 
-version = '4/04/2018-C'
+version = '4/04/2018-D'
 
 # Exception code ######################################################
 
@@ -222,26 +222,30 @@ class uVar:
             name += '1'
         else:
             first = True
-            for i in range(0,nbase):        
-                if self.vector[i]>0:
+            for i in range(0,nbase):
+                exponent = self.vector[i] 
+                if exponent == int(exponent): exponent = int(exponent)                
+                if exponent>0:
                     if not first:
                         name = name + '*'
                     first = False
                     name = name + v_names[i]
                     if self.vector[i] != 1:
-                        name = name + '^' + str(self.vector[i])
+                        name = name + '^' + str(exponent)
         if not den:
             return name
         name += '/'  
         first = True
-        for i in range(0,nbase):        
-            if self.vector[i]<0:
+        for i in range(0,nbase): 
+            exponent = self.vector[i]   
+            if exponent == int(exponent): exponent = int(exponent)            
+            if exponent<0:
                 if not first:
                     name = name + '*'
                 first = False
                 name = name + v_names[i]
                 if self.vector[i] != -1:
-                    name = name + '^' + str(-self.vector[i])  
+                    name = name + '^' + str(-exponent)  
         return name                    
       
     # Unit conversion -----------------------------------------------------------

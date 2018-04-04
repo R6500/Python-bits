@@ -15,7 +15,7 @@ from __future__ import division
 # Basic imports
 import numpy as np
 
-version = '4/04/2018-H'
+version = '4/04/2018-I'
 
 # Exception code ######################################################
 
@@ -157,6 +157,16 @@ class uVar:
         self.name   = name              # Name of the units
         self.complex = False            # No single name for units
         self.scale = scale              # Scaling factor for this unit
+        
+    # Copy object
+
+    def copy(self):
+        """
+        Returns a copy of the current object
+        """ 
+        res = uVar(self.name,self.vector,self.value,self.scale)
+        res.complex = self.complex  
+        return res        
         
     # Get internal elements ----------------------------------------------------- 
         
@@ -553,7 +563,13 @@ class uVar:
         new = self.convert(unit)    
         if new.complex:
             prefix = False
-        return f2sci(new.value,new.name,prefix=prefix,sep=sep)    
+        return f2sci(new.value,new.name,prefix=prefix,sep=sep) 
+
+    def print(self,name,unit="",sci=True,prefix=True,sep=''):
+        """
+        Prints the unit as in the same way as the printVar function
+        """
+        printVar(name,self,unit="",sci=True,prefix=True,sep='')
    
   
 # Unary non dimensionless functions ########################################

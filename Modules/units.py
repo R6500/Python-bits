@@ -15,7 +15,7 @@ from __future__ import division
 # Basic imports
 import numpy as np
 
-version = '4/04/2018-B'
+version = '4/04/2018-C'
 
 # Exception code ######################################################
 
@@ -186,14 +186,15 @@ class uVar:
       
     # Private methods -----------------------------------------------------------
       
-    def _construct_name(self): 
+    def _construct_name_old(self): 
         """
         Private function
         Return a new complex name from the base units exponents
+        Old version to be eliminated
         """
         first = True
         name = ''
-        for i in range(0,7):
+        for i in range(0,nbase):
             if self.vector[i] != 0:
                 if not first:
                     name = name + '*'
@@ -201,7 +202,47 @@ class uVar:
                 name = name + v_names[i]
                 if self.vector[i] != 1:
                     name = name + '^' + str(self.vector[i])
-        return name     
+        return name  
+
+    def _construct_name(self):
+        """
+        Private function
+        Return a new complex name from the base units exponents
+        """
+        name =''
+        num = False
+        den = False
+        for i in range(0,nbase):
+            if self.vector[i]>0: num = True
+            if self.vector[i]<0: den = True     
+        if not num:
+            if not den:
+                name = ''
+                return name
+            name += '1'
+        else:
+            first = True
+            for i in range(0,nbase):        
+                if self.vector[i]>0:
+                    if not first:
+                        name = name + '*'
+                    first = False
+                    name = name + v_names[i]
+                    if self.vector[i] != 1:
+                        name = name + '^' + str(self.vector[i])
+        if not den:
+            return name
+        name += '/'  
+        first = True
+        for i in range(0,nbase):        
+            if self.vector[i]<0:
+                if not first:
+                    name = name + '*'
+                first = False
+                name = name + v_names[i]
+                if self.vector[i] != -1:
+                    name = name + '^' + str(-self.vector[i])  
+        return name                    
       
     # Unit conversion -----------------------------------------------------------
 

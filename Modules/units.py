@@ -16,7 +16,7 @@ from __future__ import division
 # Basic imports
 import numpy as np
 
-version = '5/04/2018-C'
+version = '5/04/2018-D'
 
 # Exception code ######################################################
 
@@ -759,7 +759,13 @@ u_lm   = (u_cd*1.0).makeUnit('lm',True) # lumen
 
 u_lx   = (u_lm/u_m/u_m).makeUnit('lx',True) # lux
 
-# Non SI units ################################################################
+# Non SI units with sci prefixes ################################################
+
+u_g = (u_kg/1000).makeUnit('g',True) # gram
+
+u_eV = (1.6e-19*u_J).makeUnit('eV',True) # eV
+
+# Non SI units with no sci prefixes #############################################
 
 u_in = (25.4e-3*u_m).makeUnit('in') # inch
 
@@ -767,11 +773,7 @@ u_mil = (u_in/1000).makeUnit('mil') # mil
 
 u_cm = (u_m/100).makeUnit('cm') # cm
 
-u_eV = (1.6e-19*u_J).makeUnit('eV') # eV
-
 u_Ang = (1e-10*u_m).makeUnit('Ang') # Angstrom
-
-u_g = (u_kg/1000).makeUnit('g') # gram
 
 # Phisics constants ###########################################################
 

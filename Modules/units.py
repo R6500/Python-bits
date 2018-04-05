@@ -25,7 +25,7 @@ except:
 else:
     sym = True
 
-version = '5/04/2018-I'
+version = '5/04/2018-J'
 
 # Exception code ######################################################
 
@@ -784,18 +784,18 @@ def regSymbol(name):
     Get the symbol associated to a variable name
     """    
     return regNames[name]['symbol']
-    
+   
+def regUnit(name):
+    """
+    Get the unit associated to a variable name
+    """    
+    return regNames[name]['unit']  
+   
 def regName(symbol):
     """
     Get the name associated to a symbol
     """    
-    return regSymbols[symbol]['name'] 
-
-def regUnit(symbol):
-    """
-    Get the unit associated to a variable name
-    """    
-    return regNames[name]['unit']      
+    return regSymbols[symbol]['name']
   
 # Register actions on module load
 

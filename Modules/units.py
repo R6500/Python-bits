@@ -25,7 +25,7 @@ except:
 else:
     sym = True
 
-version = '5/04/2018-F'
+version = '5/04/2018-G'
 
 # Exception code ######################################################
 
@@ -150,6 +150,12 @@ def printVar(name,value=None,unit='',sci=True,prefix=True,sep='',level=1):
     if value is None:
         caller_globals = dict(inspect.getmembers(inspect.stack()[level][0]))["f_globals"]
         value = eval(name,caller_globals) 
+    
+    # Check if no unit is given
+    if unit == '':
+        if name in regNames:
+            if not regNames[name]['unit'] is None:
+                unit = regNames[name]['unit']
     
     # Code if value is not an uVar object
     if not isinstance(value,uVar):
@@ -514,7 +520,7 @@ class uVar:
                 res = uVar(name,vector,value,scale)
                 return res
              
-            value = self.value*self.scale/other.scale
+            value = self.value*self.scale/(other.value*other.scale)
             res = uVar('?',vector,value)
             res._reconstruct()
             return res            
@@ -758,6 +764,7 @@ def regVar(name,unit=None):
        unit : unit for variable results (Defaults to automatic)
     Returns a SymPy symbol for the variable  
     """
+    global regNames,regSymbols
     dict = {}
     dict['name'] = name
     dict['unit'] = unit
@@ -766,11 +773,39 @@ def regVar(name,unit=None):
     else:
         symbol = None
     dict['symbol'] = symbol
+    # Register on dictionaries
+    regNames[name] = dict
+    regSymbols[symbol] = dict
     return symbol    
   
 # Register actions on module load
 
 regClear()  # Clear the global registers
+  
+# SymPy evaluation ################################################
+
+if sym: # Only if correct import of sympy
+    def sympy2units(expr):
+        """
+        Converts a sympy expression to uVar objects using the registered variables
+        """
+        # Get caller globals
+        caller_globals = dict(inspect.getmembers(inspect.stack()[1][0]))["f_globals"]
+        # Get symbols on the expression
+        stuple = tuple(expr.free_symbols)
+        # Convert to function
+        func = sympy.lambdify(stuple,expr)
+        # Create list of parameters
+        list = []
+        for symbol in stuple:
+            name=regSymbols[symbol]['name']
+            object = eval(name,caller_globals)
+            list.append(object)
+        # Evaluate function    
+        res = func(*tuple(list))   
+        print(func(3,2))
+        return res
+            
   
 # Base units ######################################################
 

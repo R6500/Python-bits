@@ -25,7 +25,7 @@ except:
 else:
     sym = True
 
-version = '5/04/2018-M'
+version = '5/04/2018-N'
 
 # Exception code ######################################################
 
@@ -282,6 +282,15 @@ class uVar:
         self.value = self.value * self.scale
         self.scale = 1.0
         
+        # Check if it targets a default unit
+        tup = tuple(self.vector)
+        if tup in register:
+            unit = register[tup]
+            self.value = self.value/unit.scale
+            self.name = unit.name
+            self.complex = unit.complex
+            return
+        
         self.complex = False
         
         name =''
@@ -333,15 +342,21 @@ class uVar:
       
     # Generate unit from uVar ---------------------------------------------------
 
-    def makeUnit(self,name,sci=False):
+    def makeUnit(self,name,sci=False,reg=False):
         """
         Convert the self object in a new unit
+        Parameters:
+           name : Name of the unit
+           sci  : Use sci prefixes on unit
+           reg  : Register as default
         Returns itself
         """
         self.scale = self.scale*self.value
         self.value = 1.0
         self.name = name
         self.complex = not sci
+        if reg:
+            regUnit(self)
         return self
       
     # Unit conversion -----------------------------------------------------------
@@ -767,7 +782,19 @@ if sym: # Only if correct import of sympy
         res = func(*tuple(list))   
         return res
             
-  
+# Units register ##################################################
+
+# Start with empty register
+register = {}
+
+def regUnit(unit):
+    """
+    Register one unit as default one
+    """ 
+    global register
+    tup = tuple(unit.vector)
+    register[tup]=unit    
+
 # Base units ######################################################
 
 u_none = uVar('',[0,0,0,0,0,0,0])    # No units
@@ -785,37 +812,37 @@ u_rad  = (u_none*1.0).makeUnit('rad',True) # radian
 
 u_sr   = (u_none*1.0).makeUnit('sr',True) # steradian
 
-u_Hz   = (1.0/u_s).makeUnit('Hz',True) # hertz
+u_Hz   = (1.0/u_s).makeUnit('Hz',True,True) # hertz
 
-u_N    = (u_m*u_kg/u_s/u_s).makeUnit('N',True) # newton
+u_N    = (u_m*u_kg/u_s/u_s).makeUnit('N',True,True) # newton
 
-u_Pa   = (u_N/u_m/u_m).makeUnit('Pa',True) # pascal
+u_Pa   = (u_N/u_m/u_m).makeUnit('Pa',True,True) # pascal
 
-u_J    = (u_N*u_m).makeUnit('J',True)  # joule
+u_J    = (u_N*u_m).makeUnit('J',True,True)  # joule
 
-u_W    = (u_J/u_s).makeUnit('W',True) # watt
+u_W    = (u_J/u_s).makeUnit('W',True,True) # watt
 
-u_C    = (u_s*u_A).makeUnit('C',True) # coulomb
+u_C    = (u_s*u_A).makeUnit('C',True,True) # coulomb
 
-u_V    = (u_W/u_A).makeUnit('V',True) # volt
+u_V    = (u_W/u_A).makeUnit('V',True,True) # volt
 
-u_F    = (u_C/u_V).makeUnit('F',True) # farad
+u_F    = (u_C/u_V).makeUnit('F',True,True) # farad
 
-u_ohm  = (u_V/u_A).makeUnit('ohm',True) # ohm
+u_ohm  = (u_V/u_A).makeUnit('ohm',True,True) # ohm
 
-u_S    = (u_A/u_V).makeUnit('S',True) # siemens
+u_S    = (u_A/u_V).makeUnit('S',True,True) # siemens
 
-u_Wb   = (u_V*u_s).makeUnit('Wb',True) # weber
+u_Wb   = (u_V*u_s).makeUnit('Wb',True,True) # weber
 
-u_T    = (u_Wb/u_m/u_m).makeUnit('T',True) # tesla
+u_T    = (u_Wb/u_m/u_m).makeUnit('T',True,True) # tesla
 
-u_H    = (u_Wb/u_A).makeUnit('H',True) # henry
+u_H    = (u_Wb/u_A).makeUnit('H',True,True) # henry
 
 u_dC   = (u_K*1.0).makeUnit('dC',True) # celsius
 
 u_lm   = (u_cd*1.0).makeUnit('lm',True) # lumen
 
-u_lx   = (u_lm/u_m/u_m).makeUnit('lx',True) # lux
+u_lx   = (u_lm/u_m/u_m).makeUnit('lx',True,True) # lux
 
 # Non SI units with sci prefixes ################################################
 

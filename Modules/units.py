@@ -25,7 +25,7 @@ except:
 else:
     sym = True
 
-version = '5/04/2018-J'
+version = '5/04/2018-K'
 
 # Exception code ######################################################
 
@@ -804,7 +804,7 @@ regClear()  # Clear the global registers
 # SymPy evaluation ################################################
 
 if sym: # Only if correct import of sympy
-    def sympy2units(expr):
+    def sympy2var(expr):
         """
         Converts a sympy expression to uVar objects using the registered variables
         """

@@ -25,7 +25,7 @@ except:
 else:
     sym = True
 
-version = '5/04/2018-G'
+version = '5/04/2018-I'
 
 # Exception code ######################################################
 
@@ -149,7 +149,8 @@ def printVar(name,value=None,unit='',sci=True,prefix=True,sep='',level=1):
     # Try to evaluate variable if not given
     if value is None:
         caller_globals = dict(inspect.getmembers(inspect.stack()[level][0]))["f_globals"]
-        value = eval(name,caller_globals) 
+        caller_locals = dict(inspect.getmembers(inspect.stack()[level][0]))["f_locals"]
+        value = eval(name,caller_globals,caller_locals) 
     
     # Check if no unit is given
     if unit == '':
@@ -778,6 +779,24 @@ def regVar(name,unit=None):
     regSymbols[symbol] = dict
     return symbol    
   
+def regSymbol(name):
+    """
+    Get the symbol associated to a variable name
+    """    
+    return regNames[name]['symbol']
+    
+def regName(symbol):
+    """
+    Get the name associated to a symbol
+    """    
+    return regSymbols[symbol]['name'] 
+
+def regUnit(symbol):
+    """
+    Get the unit associated to a variable name
+    """    
+    return regNames[name]['unit']      
+  
 # Register actions on module load
 
 regClear()  # Clear the global registers
@@ -789,8 +808,9 @@ if sym: # Only if correct import of sympy
         """
         Converts a sympy expression to uVar objects using the registered variables
         """
-        # Get caller globals
+        # Get caller globals and locals
         caller_globals = dict(inspect.getmembers(inspect.stack()[1][0]))["f_globals"]
+        caller_locals = dict(inspect.getmembers(inspect.stack()[1][0]))["f_locals"]
         # Get symbols on the expression
         stuple = tuple(expr.free_symbols)
         # Convert to function
@@ -799,11 +819,10 @@ if sym: # Only if correct import of sympy
         list = []
         for symbol in stuple:
             name=regSymbols[symbol]['name']
-            object = eval(name,caller_globals)
+            object = eval(name,caller_globals,caller_locals)
             list.append(object)
         # Evaluate function    
         res = func(*tuple(list))   
-        print(func(3,2))
         return res
             
   

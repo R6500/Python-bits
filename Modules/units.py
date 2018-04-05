@@ -16,7 +16,7 @@ from __future__ import division
 # Basic imports
 import numpy as np
 
-version = '5/04/2018'
+version = '5/04/2018-B'
 
 # Exception code ######################################################
 
@@ -621,6 +621,20 @@ def sqrt(var):
     res = uVar('?',vector,value)
     res._reconstruct()
     return res 
+  
+# Special constructors #####################################################
+
+def makeArray(list,unit):
+    """
+    Creates a uVar object with numpy array as value
+    Parameters:
+       list : list, iterable or numpy array
+       unit : unit uVar object
+    returns a new uVar object   
+    """    
+    if not isinstance(unit,uVar):
+        raise unitsEx('unit is not a uVar object')
+    return unit*list
   
 # Unary dimensionless functions ############################################
 

@@ -35,9 +35,7 @@ class unitsEx(Exception):
         print("\n** Units Exception")
         print('** ' + msg)
         print("\n")    
-        
-    def __str__(self):
-        return repr(self.code)
+
       
 # Globals ############################################################      
       
@@ -119,19 +117,23 @@ def f2sci(v,unit='',nd=3,prefix=True,sep=''):
     s = s + 'E' + ('{:+d}').format(exp) + ' ' + unit
     return s    
     
+def _unitName(unit):
+    """
+    Special internal function for printVar
+    """ 
+    if isinstance(unit,uVar): 
+        return unit.name 
+    return unit           
 
-def _printUnit():
+def _printUnit(unit):
     """
     Special internal function for printVar
     """ 
     if unit == '': 
         print()
         return
-    if isinstance(unit,uVar): 
-        print(' '+unit.name)  
-        return      
-    print(' '+unit)        
-       
+    print(' '+_unitName(unit))     
+             
 def printVar(name,value=None,unit='',sci=True,prefix=True,sep='',level=1):
     """
     Print a variable name, value and units
@@ -159,9 +161,9 @@ def printVar(name,value=None,unit='',sci=True,prefix=True,sep='',level=1):
             print(name + ' = ' + str(value),end='')
             _printUnit(unit)
         if sci:
-            print(name + " = " + f2sci(value,unit,prefix=prefix,sep=sep))
+            print(name + " = " + f2sci(value,_unitName(unit),prefix=prefix,sep=sep))
         else:
-            print(name + " = " + f2s(value) + " " + unit)
+            print(name + " = " + f2s(value) + " " + _unitName(unit))
         return
 
     # Code if value is a uVar object

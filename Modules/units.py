@@ -16,7 +16,7 @@ from __future__ import division
 # Basic imports
 import numpy as np
 
-version = '5/04/2018-B'
+version = '5/04/2018-C'
 
 # Exception code ######################################################
 
@@ -634,7 +634,7 @@ def makeArray(list,unit):
     """    
     if not isinstance(unit,uVar):
         raise unitsEx('unit is not a uVar object')
-    return unit*list
+    return unit*np.array(list)
   
 # Unary dimensionless functions ############################################
 

@@ -25,7 +25,7 @@ except:
 else:
     sym = True
 
-version = '5/04/2018-E'
+version = '5/04/2018-F'
 
 # Exception code ######################################################
 
@@ -132,13 +132,23 @@ def _printUnit():
         return      
     print(' '+unit)        
        
-def printVar(name,value=None,unit='',sci=True,prefix=True,sep=''):
+def printVar(name,value=None,unit='',sci=True,prefix=True,sep='',level=1):
     """
     Print a variable name, value and units
+    Required parameters:
+        name : Name of the variable
+    Optional parameters:
+       value : value of to show (Defaults to be obtained from globals)
+        unit : units to use (Defaults to self ones)
+         sci : use sci numeric format (Defaults to True)
+      prefix : use powers of 10 prefixes (Defaults to True)
+         sep : separator between prefix and units (Defaults to none)
+    Internal use parameters:
+       level : stack level to inspect globals
     """
     # Try to evaluate variable if not given
     if value is None:
-        caller_globals = dict(inspect.getmembers(inspect.stack()[1][0]))["f_globals"]
+        caller_globals = dict(inspect.getmembers(inspect.stack()[level][0]))["f_globals"]
         value = eval(name,caller_globals) 
     
     # Code if value is not an uVar object
@@ -168,6 +178,12 @@ def printVar(name,value=None,unit='',sci=True,prefix=True,sep=''):
     else:
         print(name + " = " + str(value))    
 
+def printUnit(name,unit='',sci=True,prefix=True,sep=''):  
+    """
+    Special call to printVar without value
+    """   
+    printVar(name,value=None,unit=unit,sci=sci,prefix=prefix,sep=sep,level=2)    
+        
 # uVar class #########################################################
 
 class uVar:

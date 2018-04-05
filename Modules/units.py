@@ -25,7 +25,7 @@ except:
 else:
     sym = True
 
-version = '5/04/2018-L'
+version = '5/04/2018-M'
 
 # Exception code ######################################################
 

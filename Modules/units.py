@@ -25,7 +25,7 @@ except:
 else:
     sym = True
 
-version = '5/04/2018-K'
+version = '5/04/2018-L'
 
 # Exception code ######################################################
 
@@ -151,12 +151,6 @@ def printVar(name,value=None,unit='',sci=True,prefix=True,sep='',level=1):
         caller_globals = dict(inspect.getmembers(inspect.stack()[level][0]))["f_globals"]
         caller_locals = dict(inspect.getmembers(inspect.stack()[level][0]))["f_locals"]
         value = eval(name,caller_globals,caller_locals) 
-    
-    # Check if no unit is given
-    if unit == '':
-        if name in regNames:
-            if not regNames[name]['unit'] is None:
-                unit = regNames[name]['unit']
     
     # Code if value is not an uVar object
     if not isinstance(value,uVar):
@@ -746,61 +740,7 @@ def sci(var,unit=None,prefix=True):
         value = var*unit  
         return value.sci(prefix=prefix)
     return var.sci(unit,prefix)   
-  
-# Register functionality ##########################################
-
-def regClear():
-    """
-    Clear the register globals
-    """
-    global regNames,regSymbols
-    regNames = {}
-    regSymbols = {}
     
-def regVar(name,unit=None):
-    """
-    Registers a new variable
-    Parameters:
-       name : name of the variable
-       unit : unit for variable results (Defaults to automatic)
-    Returns a SymPy symbol for the variable  
-    """
-    global regNames,regSymbols
-    dict = {}
-    dict['name'] = name
-    dict['unit'] = unit
-    if sym:
-        symbol = sympy.Symbol(name)
-    else:
-        symbol = None
-    dict['symbol'] = symbol
-    # Register on dictionaries
-    regNames[name] = dict
-    regSymbols[symbol] = dict
-    return symbol    
-  
-def regSymbol(name):
-    """
-    Get the symbol associated to a variable name
-    """    
-    return regNames[name]['symbol']
-   
-def regUnit(name):
-    """
-    Get the unit associated to a variable name
-    """    
-    return regNames[name]['unit']  
-   
-def regName(symbol):
-    """
-    Get the name associated to a symbol
-    """    
-    return regSymbols[symbol]['name']
-  
-# Register actions on module load
-
-regClear()  # Clear the global registers
-  
 # SymPy evaluation ################################################
 
 if sym: # Only if correct import of sympy
@@ -818,7 +758,7 @@ if sym: # Only if correct import of sympy
         # Create list of parameters
         list = []
         for symbol in stuple:
-            name=regSymbols[symbol]['name']
+            name=symbol.name
             object = eval(name,caller_globals,caller_locals)
             list.append(object)
         # Evaluate function    

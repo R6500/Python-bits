@@ -6,6 +6,7 @@ Module to work with S.I. units
 History:
    3/04/2018 : First version
    4/04/2018 : Addition of non S.I. units and Physics constants
+   5/04/2018 : Modifications to work with numpy arrays
 '''
 
 # Python 2.7 compatibility
@@ -15,7 +16,7 @@ from __future__ import division
 # Basic imports
 import numpy as np
 
-version = '4/04/2018-L'
+version = '5/04/2018'
 
 # Exception code ######################################################
 
@@ -109,12 +110,29 @@ def f2sci(v,unit='',nd=3,prefix=True,sep=''):
     s = s + 'E' + ('{:+d}').format(exp) + ' ' + unit
     return s    
     
-def printVar(name,value,unit="",sci=True,prefix=True,sep=''):
+
+def _printUnit():
+    """
+    Special internal function for printVar
+    """ 
+    if unit == '': 
+        print()
+        return
+    if isinstance(unit,uVar): 
+        print(' '+unit.name)  
+        return      
+    print(' '+unit)        
+    
+def printVar(name,value,unit='',sci=True,prefix=True,sep=''):
     """
     Print a variable name, value and units
     """
     # Code if value is not an uVar object
     if not isinstance(value,uVar):
+        # Special case for numpy arrays
+        if isinstance(value,np.ndarray):
+            print(name + ' = ' + str(value),end='')
+            _printUnit(unit)
         if sci:
             print(name + " = " + f2sci(value,unit,prefix=prefix,sep=sep))
         else:
@@ -126,6 +144,10 @@ def printVar(name,value,unit="",sci=True,prefix=True,sep=''):
         raise unitsEx('If value is an uVar object, unit shall be of the same kind')    
     if unit != "":
         value=value.convert(unit)
+        
+    if isinstance(value.value,np.ndarray):
+        print(name + " = " + str(value)) 
+        return
             
     if sci:
         print(name + " = " + value.sci(prefix=prefix,sep=sep))
@@ -536,6 +558,10 @@ class uVar:
         Basic conversion to string
         Just gives the value followed by the units name
         """
+        # Special case for numpy arrays
+        if isinstance(self.value,np.ndarray):
+            return str(self.value)+' '+self.name
+        # Default case    
         return f2s(self.value)+' '+self.name      
       
     def strUnit(self,unit):
@@ -547,7 +573,11 @@ class uVar:
             message = 'Units are not compatible'
             raise unitsEx(message)
         value = self.value*self.scale/unit.scale
-        return str(value)+' '+unit.name  
+        # Special case for numpy arrays
+        if isinstance(value,np.ndarray):
+            return str(value)+' '+unit.name
+        # Default case    
+        return f2s(value)+' '+unit.name  
       
     def sci(self,unit=None,prefix=True,sep=''):
         """
@@ -679,59 +709,41 @@ u_cd   = uVar('cd',[0,0,0,0,0,0,1])  # Candela
 
 # Derived units ###################################################
 
-u_rad  = u_none*1.0     # radian
-u_rad.set_name('rad')
+u_rad  = (u_none*1.0).makeUnit('rad',True) # radian
 
-u_sr   = u_none*1.0     # steradian
-u_sr.set_name('sr')
+u_sr   = (u_none*1.0).makeUnit('sr',True) # steradian
 
-u_Hz   = 1.0/u_s        # hertz
-u_Hz.set_name('Hz')
+u_Hz   = (1.0/u_s).makeUnit('Hz',True) # hertz
 
-u_N    = u_m*u_kg/u_s/u_s # newton
-u_N.set_name('N')
+u_N    = (u_m*u_kg/u_s/u_s).makeUnit('N',True) # newton
 
-u_Pa   = u_N/u_m/u_m    # pascal
-u_Pa.set_name('Pa')
+u_Pa   = (u_N/u_m/u_m).makeUnit('Pa',True) # pascal
 
-u_J    = u_N*u_m        # joule
-u_J.set_name('J')
+u_J    = (u_N*u_m).makeUnit('J',True)  # joule
 
-u_W    = u_J/u_s        # watt
-u_W.set_name('W')
+u_W    = (u_J/u_s).makeUnit('W',True) # watt
 
-u_C    = u_s*u_A        # coulomb
-u_C.set_name('C')
+u_C    = (u_s*u_A).makeUnit('C',True) # coulomb
 
-u_V    = u_W/u_A        # volt
-u_V.set_name('V')
+u_V    = (u_W/u_A).makeUnit('V',True) # volt
 
-u_F    = u_C/u_V        # farad
-u_F.set_name('F')
+u_F    = (u_C/u_V).makeUnit('F',True) # farad
 
-u_ohm  = u_V/u_A        # ohm
-u_ohm.set_name('ohm')
+u_ohm  = (u_V/u_A).makeUnit('ohm',True) # ohm
 
-u_S    = u_A/u_V        # siemens
-u_S.set_name('S')
+u_S    = (u_A/u_V).makeUnit('S',True) # siemens
 
-u_Wb   = u_V*u_s        # weber
-u_Wb.set_name('Wb')
+u_Wb   = (u_V*u_s).makeUnit('Wb',True) # weber
 
-u_T    = u_Wb/u_m/u_m   # tesla
-u_T.set_name('T')
+u_T    = (u_Wb/u_m/u_m).makeUnit('T',True) # tesla
 
-u_H    = u_Wb/u_A       # henry
-u_H.set_name('H')
+u_H    = (u_Wb/u_A).makeUnit('H',True) # henry
 
-u_dC   = u_K*1.0        # celsius
-u_dC.set_name('dC')
+u_dC   = (u_K*1.0).makeUnit('dC',True) # celsius
 
-u_lm   = u_cd*1.0       # lumen
-u_lm.set_name('lm')
+u_lm   = (u_cd*1.0).makeUnit('lm',True) # lumen
 
-u_lx   = u_lm/u_m/u_m   # lux
-u_lx.set_name('lx')
+u_lx   = (u_lm/u_m/u_m).makeUnit('lx',True) # lux
 
 # Non SI units ################################################################
 

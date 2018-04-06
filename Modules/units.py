@@ -15,7 +15,7 @@ History:
 from __future__ import print_function
 from __future__ import division
 
-version = '6/04/2018-B'
+version = '6/04/2018-C'
 
 # Basic imports
 import numpy as np
@@ -835,11 +835,15 @@ if calc_imported: # Only if correct import of calc
                 xt = '$' + x + '\quad (' + xv.name + ')$'
             else:
                 xt = x + ' (' + xv.name + ')'
+        else:
+            xt = xt.replace('(unit)','('+xv.name+')')
         if yt == '':
             if latex:
                 yt = '$' + y + '\quad (' + yv.name + ')$'
             else:
                 yt = y + ' (' + yv.name + ')'    
+        else:
+            yt = yt.replace('(unit)','('+yv.name+')')
         calc.plot11(xv.value,yv.value,title=title,xt=xt,yt=yt,logx=logx,logy=logy,grid=grid)   
 
 def _getValues(list):
@@ -874,11 +878,15 @@ if calc_imported: # Only if correct import of calc
                 xt = '$' + x + '\quad (' + xv.name + ')$'
             else:
                 xt = x + ' (' + xv.name + ')'
+        else:
+            xt = xt.replace('(unit)','('+xv.name+')')
         if yt == '':
             if latex:
                 yt = '$(' + ylistv[0].name + ')$'
             else:
                 yt = '(' + ylistv[0].name + ')'
+        else:
+            yt = yt.replace('(unit)','('+ylistv[0].name+')')
         # Create curve labels if needed
         if labels == []:
             labels = ylist
@@ -901,11 +909,15 @@ if calc_imported: # Only if correct import of calc
                 xt = '$' + xlist[0] + '\quad (' + xlistv[0].name + ')$'
             else:
                 xt = xlist[0] + ' (' + xlistv[0].name + ')'
+        else:
+            xt = xt.replace('(unit)','('+xlistv[0].name+')')
         if yt == '':
             if latex:
                 yt = '$(' + ylistv[0].name + ')$'
             else:
                 yt = '(' + ylistv[0].name + ')'
+        else:
+            yt = yt.replace('(unit)','('+ylistv[0].name+')')
         # Create curve labels if needed
         if labels == []:
             labels = ylist

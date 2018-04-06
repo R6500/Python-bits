@@ -7,11 +7,15 @@ History:
    3/04/2018 : First version
    4/04/2018 : Addition of non S.I. units and Physics constants
    5/04/2018 : Modifications to work with numpy arrays
+               Connection with sympy
+   6/04/2018 : Connection with calc
 '''
 
 # Python 2.7 compatibility
 from __future__ import print_function
 from __future__ import division
+
+version = '6/04/2018'
 
 # Basic imports
 import numpy as np
@@ -21,11 +25,17 @@ import inspect
 try:		
     import sympy
 except:
-    sym = False
+    sympy_imported = False
 else:
-    sym = True
+    sympy_imported = True
 
-version = '5/04/2018-N'
+# Try to load calc    
+try:
+    import calc
+except:
+    calc_imported = False
+else:
+    calc_imported = True    
 
 # Exception code ######################################################
 
@@ -225,19 +235,19 @@ class uVar:
         
     # Get internal elements ----------------------------------------------------- 
         
-    def value(self):
+    def get_value(self):
         """
         Returns the numeric value of the object
         """
         return self.value
       
-    def vector(self):
+    def get_vector(self):
         """
         Return the vector of base units exponents
         """
         return self.vector
       
-    def name(self):
+    def get_name(self):
         """
         Return the name of the object units
         """
@@ -760,7 +770,7 @@ def sci(var,unit=None,prefix=True):
     
 # SymPy evaluation ################################################
 
-if sym: # Only if correct import of sympy
+if sympy_imported: # Only if correct import of sympy
     def sympy2var(expr):
         """
         Converts a sympy expression to uVar objects using the registered variables
@@ -795,6 +805,99 @@ def regUnit(unit):
     tup = tuple(unit.vector)
     register[tup]=unit    
 
+# calc module access ##############################################
+
+def _getVar(name,level=2):
+    """
+    Get a variable from its name
+    Level indicates stack level
+    Level 2 is appropiate if this function is called from a function
+    of this module that is called from the target context
+    """
+    # Get caller globals and locals
+    caller_globals = dict(inspect.getmembers(inspect.stack()[level][0]))["f_globals"]
+    caller_locals = dict(inspect.getmembers(inspect.stack()[level][0]))["f_locals"]
+    # Get variable
+    var = eval(name,caller_globals,caller_locals)
+    # Return variable
+    return var
+     
+  
+
+# Those functions will be created only if the calc module is imported    
+   
+if calc_imported: # Only if correct import of calc
+    def plot11(x,y,title='',xt='',yt='',logx=False,logy=False,grid=True):
+        # Get objects for the axis
+        xv = _getVar(x)
+        yv = _getVar(y)
+        # Create axes labels if needed
+        if xt == '':
+            xt = x + ' (' + xv.name + ')'
+        if yt == '':
+            yt = y + ' (' + yv.name + ')'    
+        calc.plot11(xv.value,yv.value,title=title,xt=xt,yt=yt,logx=logx,logy=logy,grid=grid)   
+
+def _getValues(list):
+    '''
+    Internal function for the plot1n and plotnn functions
+    '''
+    values = [list[0].value]
+    if len(list) > 1:
+            for i in range(1,len(list)):
+                # Check if units are compatible
+                if not list[0].check(list[i]):
+                    raise unitsEx('All elements in one axis should feature compatible units')
+                # Convert compatible units if needed    
+                if list[i].name != list[0].name:
+                    list[i] = list[i].convert(list[0])
+                # Add value to list
+                values.append(list[i].value)
+    return values            
+    
+        
+if calc_imported: # Only if correct import of calc
+    def plot1n(x,ylist,title="",xt="",yt="",labels=[],location='best'
+               ,logx=False,logy=False,grid=True):
+        # Get objects for the axis
+        xv = _getVar(x)
+        ylistv = [_getVar(element,level=3) for element in ylist]
+        # Get values of the y list
+        yvalues = _getValues(ylistv)
+        # Create axes labels if needed
+        if xt == '':
+            xt = x + ' (' + xv.name + ')'
+        if yt == '':
+            yt = '(' + ylistv[0].name + ')'
+        # Create curve labels if needed
+        if labels == []:
+            labels = ylist
+        # Execute the plot command           
+        calc.plot1n(xv.value,yvalues,title=title,xt=xt,yt=yt,labels=labels,location=location
+               ,logx=logx,logy=logy,grid=grid)       
+
+if calc_imported: # Only if correct import of calc
+    def plotnn(xlist,ylist,title="",xt="",yt="",labels=[],location='best',logx=False,logy=False,grid=True):
+        # Get objects for the axes (level 3 because of list generator)
+        xlistv = [_getVar(element,level=3) for element in xlist]
+        ylistv = [_getVar(element,level=3) for element in ylist]
+        # Get values of the axes lists
+        xvalues = _getValues(xlistv)
+        yvalues = _getValues(ylistv)
+        # Create axes labels if needed
+        if xt == '':
+            xt = xlist[0] + ' (' + xlistv[0].name + ')'
+        if yt == '':
+            yt = '(' + ylistv[0].name + ')'
+        # Create curve labels if needed
+        if labels == []:
+            labels = ylist
+        # Execute the plot command
+        calc.plotnn(xvalues,yvalues,title=title,xt=xt,yt=yt,labels=labels,location=location
+                    ,logx=logx,logy=logy,grid=grid)        
+        
+          
+   
 # Base units ######################################################
 
 u_none = uVar('',[0,0,0,0,0,0,0])    # No units
@@ -860,6 +963,14 @@ u_cm = (u_m/100).makeUnit('cm') # cm
 
 u_Ang = (1e-10*u_m).makeUnit('Ang') # Angstrom
 
+u_deg = (np.pi*u_rad/180).makeUnit('deg') # degree
+
+u_min = (u_s*60).makeUnit('min') # minute
+
+u_h = (u_min*60).makeUnit('h') # hour
+
+u_day = (u_h*24).makeUnit('day') # days
+
 # Phisics constants ###########################################################
 
 # Electron charge
@@ -867,6 +978,9 @@ c_q = 1.6e-19 * u_C
 
 # Vacuum permitivity
 c_e0 = 8.85e-14 * u_F/u_cm
+
+# Free space permeability
+c_u0 = 4 * np.pi * u_H/u_m
 
 # Boltzman constant
 c_k = 8.62e-5 * u_eV/u_K
@@ -882,5 +996,11 @@ c_G = 6.674e-11 * u_N*u_m**2/u_kg**2
 
 # Gravital acceleration
 c_g = 9.80665 * u_m/u_s**2
+
+# Speed of light
+c_c = 299792458 * u_m/u_s
+
+# Avogadro constant
+c_Na = 6.022140857e23 / u_mol
 
 

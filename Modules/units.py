@@ -15,7 +15,7 @@ History:
 from __future__ import print_function
 from __future__ import division
 
-version = '6/04/2018'
+version = '6/04/2018-B'
 
 # Basic imports
 import numpy as np
@@ -821,21 +821,25 @@ def _getVar(name,level=2):
     var = eval(name,caller_globals,caller_locals)
     # Return variable
     return var
-     
-  
-
+       
 # Those functions will be created only if the calc module is imported    
    
 if calc_imported: # Only if correct import of calc
-    def plot11(x,y,title='',xt='',yt='',logx=False,logy=False,grid=True):
+    def plot11(x,y,title='',xt='',yt='',logx=False,logy=False,grid=True,latex=False):
         # Get objects for the axis
         xv = _getVar(x)
         yv = _getVar(y)
         # Create axes labels if needed
         if xt == '':
-            xt = x + ' (' + xv.name + ')'
+            if latex:
+                xt = '$' + x + '\quad (' + xv.name + ')$'
+            else:
+                xt = x + ' (' + xv.name + ')'
         if yt == '':
-            yt = y + ' (' + yv.name + ')'    
+            if latex:
+                yt = '$' + y + '\quad (' + yv.name + ')$'
+            else:
+                yt = y + ' (' + yv.name + ')'    
         calc.plot11(xv.value,yv.value,title=title,xt=xt,yt=yt,logx=logx,logy=logy,grid=grid)   
 
 def _getValues(list):
@@ -858,7 +862,7 @@ def _getValues(list):
         
 if calc_imported: # Only if correct import of calc
     def plot1n(x,ylist,title="",xt="",yt="",labels=[],location='best'
-               ,logx=False,logy=False,grid=True):
+               ,logx=False,logy=False,grid=True,latex=False):
         # Get objects for the axis
         xv = _getVar(x)
         ylistv = [_getVar(element,level=3) for element in ylist]
@@ -866,9 +870,15 @@ if calc_imported: # Only if correct import of calc
         yvalues = _getValues(ylistv)
         # Create axes labels if needed
         if xt == '':
-            xt = x + ' (' + xv.name + ')'
+            if latex:
+                xt = '$' + x + '\quad (' + xv.name + ')$'
+            else:
+                xt = x + ' (' + xv.name + ')'
         if yt == '':
-            yt = '(' + ylistv[0].name + ')'
+            if latex:
+                yt = '$(' + ylistv[0].name + ')$'
+            else:
+                yt = '(' + ylistv[0].name + ')'
         # Create curve labels if needed
         if labels == []:
             labels = ylist
@@ -877,7 +887,8 @@ if calc_imported: # Only if correct import of calc
                ,logx=logx,logy=logy,grid=grid)       
 
 if calc_imported: # Only if correct import of calc
-    def plotnn(xlist,ylist,title="",xt="",yt="",labels=[],location='best',logx=False,logy=False,grid=True):
+    def plotnn(xlist,ylist,title="",xt="",yt="",labels=[],location='best'
+              ,logx=False,logy=False,grid=True,latex=False):
         # Get objects for the axes (level 3 because of list generator)
         xlistv = [_getVar(element,level=3) for element in xlist]
         ylistv = [_getVar(element,level=3) for element in ylist]
@@ -886,9 +897,15 @@ if calc_imported: # Only if correct import of calc
         yvalues = _getValues(ylistv)
         # Create axes labels if needed
         if xt == '':
-            xt = xlist[0] + ' (' + xlistv[0].name + ')'
+            if latex:
+                xt = '$' + xlist[0] + '\quad (' + xlistv[0].name + ')$'
+            else:
+                xt = xlist[0] + ' (' + xlistv[0].name + ')'
         if yt == '':
-            yt = '(' + ylistv[0].name + ')'
+            if latex:
+                yt = '$(' + ylistv[0].name + ')$'
+            else:
+                yt = '(' + ylistv[0].name + ')'
         # Create curve labels if needed
         if labels == []:
             labels = ylist

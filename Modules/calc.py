@@ -17,6 +17,7 @@ History:
                Correction on f2s  
                Elimination of electronics functions that now belong to 
                the 'electronicsDC' module
+   7/04/2018 : Add getVar and named parameters in plot functions               
 '''
 
 # Python 2.7 compatibility
@@ -27,7 +28,9 @@ import numpy as np               # Import numpy for numeric calculations
 import pylab as pl               # Import pylab
 import matplotlib.pyplot as plt
 
-version = '15/3/2018-C'
+import inspect
+
+version = '7/4/2018'
 
 # Define normal mode outside colaboratory
 colaboratory = False
@@ -115,6 +118,22 @@ def printTitle(title):
     print(title)
     print()
 
+# Getvar ################################################################################
+
+def getVar(name,level=1):
+    """
+    Get a variable from its name
+    Level indicates stack level
+    Level 1 is appropiate if this function is called from the target context
+    """
+    # Get caller globals and locals
+    caller_globals = dict(inspect.getmembers(inspect.stack()[level][0]))["f_globals"]
+    caller_locals = dict(inspect.getmembers(inspect.stack()[level][0]))["f_locals"]
+    # Get variable
+    var = eval(name,caller_globals,caller_locals)
+    # Return variable
+    return var    
+    
 #########################################################################################
 # COLABORATORY DRAWING CODE                                                             #
 #########################################################################################    
@@ -282,13 +301,13 @@ If x is an empty list [], a sequence number
 will be used for the x axis
 
 Required parameters:
-  x : Horizontal vector
-  y : Vertical vector
+  x : Horizontal vector (string calls eval)
+  y : Vertical vector (string calls eval)
   
 Optional parameters:
   title : Plot title (Defaults to none)
-     xt : Label for x axis (Defaults to none)
-     yt : Label for y axis (Defaults to none)
+     xt : Label for x axis (Defaults to none or x string)
+     yt : Label for y axis (Defaults to none or y string)
    logx : Use logarithmic x axis (Defaults to False)
    logy : Use logarithmic x axis (Defaults to False)
    grid : Draw a grid (Defaults to true)
@@ -296,6 +315,15 @@ Optional parameters:
 Returns nothing
 '''
 def plot11(x,y,title="",xt="",yt="",logx=False,logy=False,grid=True):
+    # Check for x, y given as strings
+    if type(x)==str:
+        if xt=='': xt=x
+        x = getVar(x,level=2)
+    if type(y)==str:
+        if yt=='': yt=y
+        y = getVar(y,level=2)
+        
+    # Check colaboratory    
     if colaboratory:
         jplot11(x,y,title,xt,yt,logx,logy,grid)
         return
@@ -338,6 +366,21 @@ Optional parameters:
 Returns nothing
 '''
 def plot1n(x,ylist,title="",xt="",yt="",labels=[],location='best',logx=False,logy=False,grid=True):
+    # Check for x, y given as strings
+    if type(x)==str:
+        if xt=='': xt=x
+        x = getVar(x,level=2)
+    if type(ylist[0]==str) and (labels==[]): 
+        labels=ylist
+    ylist2 = []
+    for element in ylist:
+        if type(element) == str:
+            ylist2.append(getVar(element,level=2))
+        else:
+            ylist2.append(element)
+    ylist=ylist2        
+
+    # Check if we are in colaboratory
     if colaboratory:
         jplot1n(x,ylist,title,xt,yt,labels,location,logx,logy,grid)
         return
@@ -387,6 +430,29 @@ Optional parameters:
 Returns nothing
 '''
 def plotnn(xlist,ylist,title="",xt="",yt="",labels=[],location='best',logx=False,logy=False,grid=True):
+    # Check for x, y given as strings
+    if type(xlist[0]==str):
+        if xt=='': xt=xlist[0]
+    if type(ylist[0]==str) and (labels==[]): 
+        labels=ylist
+        
+    xlist2 = []
+    for element in xlist:
+        if type(element) == str:
+            xlist2.append(getVar(element,level=2))
+        else:
+            xlist2.append(element)
+    xlist=xlist2  
+    
+    ylist2 = []
+    for element in ylist:
+        if type(element) == str:
+            ylist2.append(getVar(element,level=2))
+        else:
+            ylist2.append(element)
+    ylist=ylist2    
+    
+    # Check if we are in colaboratory
     if colaboratory:
         jplotnn(xlist,ylist,title,xt,yt,labels,location,logx,logy,grid)
         return

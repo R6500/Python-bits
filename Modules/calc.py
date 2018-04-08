@@ -350,14 +350,14 @@ If x is an empty list [], a sequence number
 will be used for the x axis
 
 Required parameters:
-      x : Horizontal vector
-  ylist : List of vertical vectors
+      x : Horizontal vector (string calls eval)
+  ylist : List of vertical vectors (list of strings calls eval)
   
 Optional parameters:
     title : Plot title (Defaults to none)
-       xt : Label for x axis (Defaults to none)
+       xt : Label for x axis (Defaults to none or x string)
        yt : Label for y axis (Defaults to none)
-   labels : List of legend labels (Defaults to none)
+   labels : List of legend labels (Defaults to none or ylist strings)
  location : Location for legend (Defaults to 'best')
      logx : Use logarithmic x axis (Defaults to False)
      logy : Use logarithmic x axis (Defaults to False)
@@ -414,14 +414,14 @@ plotnn(xlist,ylist,title,xt,yt,labels,location,logx,logy,grid)
 Plot several curves with different inputs and outputs
 
 Required parameters:
-  xlist : List of horizontal vector
-  ylist : List of vertical vectors
+  xlist : List of horizontal vector (list of strings calls eval)
+  ylist : List of vertical vectors (list of strings calls eval)
   
 Optional parameters:
     title : Plot title (Defaults to none)
-       xt : Label for x axis (Defaults to none)
+       xt : Label for x axis (Defaults to none or first string of xlist)
        yt : Label for y axis (Defaults to none)
-   labels : List of legend labels (Defaults to none)
+   labels : List of legend labels (Defaults to none or ylist strings)
  location : Location for legend (Defaults to 'best')
      logx : Use logarithmic x axis (Defaults to False)
      logy : Use logarithmic x axis (Defaults to False)
@@ -479,13 +479,13 @@ plotHist(v,bins=10,title="",xt="",yt="",grid)
 Plot an histagram from provided data
 
 Required parameters:
-  v : Data vector
+  v : Data vector (string calls eval)
   
 Optional parameters:
      bins : Number of bins for the histogram (Defaults to 10)
     title : Plot title (Defaults to none)
-       xt : Label for x axis (Defaults to none)
-       yt : Label for y axis (Defaults to none)
+       xt : Label for x axis (Defaults to none or x string)
+       yt : Label for y axis (Defaults to none or 'Frequency' if v is string)
      grid : Use grid (Default to True)     
      
 Returns nothing   

@@ -30,7 +30,7 @@ import matplotlib.pyplot as plt
 
 import inspect
 
-version = '7/4/2018'
+version = '8/4/2018'
 
 # Define normal mode outside colaboratory
 colaboratory = False
@@ -491,9 +491,16 @@ Optional parameters:
 Returns nothing   
 '''    
 def plotHist(v,bins=10,title="",xt="",yt="",grid=True):
+    # Check for v given as strings
+    if type(v)==str:
+        if xt=='': xt=v
+        v = getVar(v,level=2)
+        if yt=='': yt='Frequency'
+        
+    # Check colaboratory 
     if colaboratory:
-        jplotHist(v,bins,title,xt,yt,grid)
-        return
+        jplotHist(v,bins=bins,title=title,xt=xt,yt=yt,grid=grid)
+        return  
       
     plt.figure(facecolor="white")   # White border
     

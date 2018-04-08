@@ -15,7 +15,7 @@ History:
 from __future__ import print_function
 from __future__ import division
 
-version = '8/04/2018-D'
+version = '8/04/2018-E'
 
 # Basic imports
 import numpy as np
@@ -283,7 +283,9 @@ class uVar:
         """
         Execute a function on the value of the uVar object
         """
-        self.value = func(self.value)
+        new = self.copy()
+        new.value = func(new.value)
+        return new
       
     # Private methods -----------------------------------------------------------
       

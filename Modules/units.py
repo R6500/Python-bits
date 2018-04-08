@@ -15,7 +15,7 @@ History:
 from __future__ import print_function
 from __future__ import division
 
-version = '6/04/2018-D'
+version = '8/04/2018'
 
 # Basic imports
 import numpy as np
@@ -682,6 +682,18 @@ def sqrt(var):
   
 # Special constructors #####################################################
 
+def makeValue(value,unit):
+    """
+    Creates a uVar object with indicated value
+    Parameters:
+       value : value to set
+       unit : unit uVar object
+    returns a new uVar object   
+    """    
+    if not isinstance(unit,uVar):
+        raise unitsEx('unit is not a uVar object')
+    return unit*value
+
 def makeArray(list,unit):
     """
     Creates a uVar object with numpy array as value
@@ -925,7 +937,25 @@ if calc_imported: # Only if correct import of calc
         calc.plotnn(xvalues,yvalues,title=title,xt=xt,yt=yt,labels=labels,location=location
                     ,logx=logx,logy=logy,grid=grid)        
         
-          
+if calc_imported: # Only if correct import of calc
+    def plotHist(v,bins=10,title="",xt="",yt="",grid=True,latex=False):  
+        # Get vector
+        vv = _getVar(v)
+        # Create axes labels if needed
+        if xt == '':
+            if latex:
+                xt = '$' + v + '\quad (' + vv.name + ')$'
+            else:
+                xt = v + ' (' + vv.name + ')'
+        else:
+            xt = xt.replace('<unit>',vv.name)
+        if yt == '':
+            if latex:
+                yt = '$Frequency$'
+            else:
+                yt = 'Frequency'  
+        # Execute the plot command                
+        calc.plotHist(vv.value,bins=bins,title=title,xt=xt,yt=yt,grid=grid)
    
 # Base units ######################################################
 

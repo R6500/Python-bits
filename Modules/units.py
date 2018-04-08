@@ -15,7 +15,7 @@ History:
 from __future__ import print_function
 from __future__ import division
 
-version = '8/04/2018-B'
+version = '8/04/2018-C'
 
 # Basic imports
 import numpy as np
@@ -36,6 +36,14 @@ except:
     calc_imported = False
 else:
     calc_imported = True    
+    
+# Try to load mmVars    
+try:
+    import mmVars as mm
+except:
+    mmVars_imported = False
+else:
+    mmVars_imported = True      
 
 # Exception code ######################################################
 
@@ -619,6 +627,10 @@ class uVar:
         # Special case for numpy arrays
         if isinstance(self.value,np.ndarray):
             return str(self.value)+' '+self.name
+        # Special case for mmVar objects
+        if mmVars_imported:
+            if isinstance(self.value,mm.mmVar):
+                return str(self.value)+' '+self.name
         # Default case    
         return f2s(self.value)+' '+self.name      
       

@@ -15,7 +15,7 @@ History:
 from __future__ import print_function
 from __future__ import division
 
-version = '8/04/2018-F'
+version = '8/04/2018-G'
 
 # Basic imports
 import numpy as np
@@ -295,6 +295,14 @@ class uVar:
         """
         new = self.copy()
         new.value = value
+        return new
+        
+    def newUnit(self):
+        """
+        Return the units of a uVar object as a new object
+        """
+        new = self.copy()
+        new.value = 1
         return new
       
     # Private methods -----------------------------------------------------------

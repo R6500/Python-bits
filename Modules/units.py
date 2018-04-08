@@ -15,7 +15,7 @@ History:
 from __future__ import print_function
 from __future__ import division
 
-version = '8/04/2018-E'
+version = '8/04/2018-F'
 
 # Basic imports
 import numpy as np
@@ -277,14 +277,24 @@ class uVar:
         """
         self.value = value
         
-    # Operate on internal value (without units) ---------------------------------
+    # Especial constructors  ----------------------------------------------------
 
     def operateValue(self,func):   
         """
         Execute a function on the value of the uVar object
+        Returns a new object
         """
         new = self.copy()
         new.value = func(new.value)
+        return new
+        
+    def newValue(self,value):
+        """
+        Sets a new value
+        Returns a new object        
+        """
+        new = self.copy()
+        new.value = value
         return new
       
     # Private methods -----------------------------------------------------------

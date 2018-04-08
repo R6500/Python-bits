@@ -15,7 +15,7 @@ History:
 from __future__ import print_function
 from __future__ import division
 
-version = '8/04/2018'
+version = '8/04/2018-B'
 
 # Basic imports
 import numpy as np
@@ -682,7 +682,7 @@ def sqrt(var):
   
 # Special constructors #####################################################
 
-def makeValue(value,unit):
+def makeVar(value,unit):
     """
     Creates a uVar object with indicated value
     Parameters:

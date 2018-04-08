@@ -15,7 +15,7 @@ History:
 from __future__ import print_function
 from __future__ import division
 
-version = '8/04/2018-C'
+version = '8/04/2018-D'
 
 # Basic imports
 import numpy as np
@@ -270,6 +270,20 @@ class uVar:
         """
         self.name=name
         self.complex = complex
+        
+    def set_value(self,value):
+        """
+        Returns the numeric value of the object
+        """
+        self.value = value
+        
+    # Operate on internal value (without units) ---------------------------------
+
+    def operateValue(self,func):   
+        """
+        Execute a function on the value of the uVar object
+        """
+        self.value = func(self.value)
       
     # Private methods -----------------------------------------------------------
       

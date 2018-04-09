@@ -9,13 +9,14 @@ History:
    5/04/2018 : Modifications to work with numpy arrays
                Connection with sympy
    6/04/2018 : Connection with calc
+   9/04/2018 : Units as text in make* functions
 '''
 
 # Python 2.7 compatibility
 from __future__ import print_function
 from __future__ import division
 
-version = '8/04/2018-G'
+version = '9/04/2018'
 
 # Basic imports
 import numpy as np
@@ -728,16 +729,79 @@ def sqrt(var):
   
 # Special constructors #####################################################
 
+def _evalPrefix(cad):
+    """
+    Internal function
+    """
+    pot={'k':1e3,'M':1e6,'G':1e9,'T':1e12,'P':1e15,'E':1e18
+        ,'m':1e-3,'u':1e-6,'n':1e-9,'p':1e-12,'f':1e-15,'a':1e-18}
+    if cad in pot:
+        return pot[cad]
+    return None    
+
+def _evalUnit(name,level=3):
+    """
+    Internal function
+    """   
+    # Try to evaluate as unit variable
+    try:
+        var = _getVar('u_'+name,level)
+    except:
+        return None
+    if not isinstance(var,uVar):
+        raise unitsEx('unit name does not eval to uVar object')
+    return var    
+    
+def _getUnit(unit,level=2):
+    """
+    Internal function used by makeVar and makeArray
+    Parameters:
+      unit  : Unit as uVar or string
+      level : Stack level for eval
+    """
+    # Check if unit is a  uVar object
+    if isinstance(unit,uVar):
+        return unit
+    # Check if unit is a string    
+    if type(unit) != str:
+        raise unitsEx('unit shall be uVar object or string')
+        
+    # Check '_' at position 1
+    if len(unit)>1 and unit[1] == '_':
+        power = _evalPrefix(unit[0])
+        if power is None:
+            raise unitsEx('invalid prefix')
+        var = _evalUnit(unit[2:])
+        if var is None:
+            raise unitsEx('unit does not evaluate to any variable')
+        return var*power
+    
+    # Try to evaluate all the name
+    var = _evalUnit(unit,level=level+1)
+    if not var is None:
+        return var
+        
+    if len(unit)<2:
+        raise unitsEx('cannot evaluate unit string')
+        
+    # Try to evaluate prefix if anything fails
+    power = _evalPrefix(unit[0]) 
+    if power is None:
+        raise unitsEx('cannot evaluate unit string')
+    var = _evalUnit(unit[1:])
+    if var is None:
+        raise unitsEx('cannot evaluate unit string')
+    return var*power    
+
 def makeVar(value,unit):
     """
     Creates a uVar object with indicated value
     Parameters:
        value : value to set
-       unit : unit uVar object
+       unit : unit uVar object or string
     returns a new uVar object   
     """    
-    if not isinstance(unit,uVar):
-        raise unitsEx('unit is not a uVar object')
+    unit = _getUnit(unit)
     return unit*value
 
 def makeArray(list,unit):
@@ -748,8 +812,7 @@ def makeArray(list,unit):
        unit : unit uVar object
     returns a new uVar object   
     """    
-    if not isinstance(unit,uVar):
-        raise unitsEx('unit is not a uVar object')
+    unit = _getUnit(unit)
     return unit*np.array(list)
   
 # Unary dimensionless functions ############################################

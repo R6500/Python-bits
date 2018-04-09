@@ -16,7 +16,7 @@ History:
 from __future__ import print_function
 from __future__ import division
 
-version = '9/04/2018'
+version = '9/04/2018-B'
 
 # Basic imports
 import numpy as np
@@ -142,7 +142,18 @@ def _unitName(unit):
     """ 
     if isinstance(unit,uVar): 
         return unit.name 
-    return unit           
+    return unit 
+
+def _usePrefix(unit,prefix):
+    """
+    Special internal function for printVar
+    """
+    if isinstance(unit,uVar): 
+        if unit.complex:
+            return False
+        else:
+            return prefix
+    return prefix   
 
 def _printUnit(unit):
     """
@@ -180,6 +191,7 @@ def printVar(name,value=None,unit='',sci=True,prefix=True,sep='',level=1):
             print(name + ' = ' + str(value),end='')
             _printUnit(unit)
         if sci:
+            prefix = _usePrefix(unit,prefix)
             print(name + " = " + f2sci(value,_unitName(unit),prefix=prefix,sep=sep))
         else:
             print(name + " = " + f2s(value) + " " + _unitName(unit))
@@ -536,11 +548,13 @@ class uVar:
                 name = other.name
                 scale = other.scale
                 res = uVar(name,vector,value,scale)
+                res.complex = other.complex
                 return res
             if other.is_none():
                 name = self.name
                 scale = self.scale
                 res = uVar(name,vector,value,scale)
+                res.complex = self.complex
                 return res
              
             value = value*self.scale*other.scale
@@ -554,6 +568,7 @@ class uVar:
         name   = self.name
         scale  = self.scale
         res = uVar(name,vector,value,scale)
+        res.complex = self.complex
         return res
             
     def __rmul__(self,other):
@@ -583,6 +598,7 @@ class uVar:
                 name = self.name
                 scale = self.scale
                 res = uVar(name,vector,value,scale)
+                res.complex = self.complex
                 return res
              
             value = self.value*self.scale/(other.value*other.scale)
@@ -596,6 +612,7 @@ class uVar:
         name   = self.name
         scale  = self.scale
         res = uVar(name,vector,value,scale)
+        res.complex = self.complex
         return res
       
     def __rtruediv__(self,other):
@@ -620,7 +637,9 @@ class uVar:
         vector = self.vector
         value = abs(self.value)
         scale = self.scale
-        return uVar(name,vector,value,scale)
+        res = uVar(name,vector,value,scale)
+        res.complex = self.complex
+        return res
       
     def __pow__(self,other):
         """
@@ -695,7 +714,7 @@ class uVar:
         """
         if unit is None:
             if self.complex:
-                prefix = False    
+                prefix = False   
             return f2sci(self.value,self.name,prefix=prefix,sep=sep)
         if not self.check(unit):
             message = 'Units are not compatible'
@@ -777,7 +796,7 @@ def _getUnit(unit,level=2):
         return var*power
     
     # Try to evaluate all the name
-    var = _evalUnit(unit,level=level+1)
+    var = _evalUnit(unit,level=level+2)
     if not var is None:
         return var
         

@@ -16,7 +16,7 @@ History:
 from __future__ import print_function
 from __future__ import division
 
-version = '9/04/2018-B'
+version = '9/04/2018-C'
 
 # Basic imports
 import numpy as np
@@ -180,9 +180,7 @@ def printVar(name,value=None,unit='',sci=True,prefix=True,sep='',level=1):
     """
     # Try to evaluate variable if not given
     if value is None:
-        caller_globals = dict(inspect.getmembers(inspect.stack()[level][0]))["f_globals"]
-        caller_locals = dict(inspect.getmembers(inspect.stack()[level][0]))["f_locals"]
-        value = eval(name,caller_globals,caller_locals) 
+        value = _getVar(name,level=level+1)
     
     # Code if value is not an uVar object
     if not isinstance(value,uVar):
@@ -764,7 +762,7 @@ def _evalUnit(name,level=3):
     """   
     # Try to evaluate as unit variable
     try:
-        var = _getVar('u_'+name,level)
+        var = _getVar('u_'+name,level+1)
     except:
         return None
     if not isinstance(var,uVar):
@@ -796,7 +794,7 @@ def _getUnit(unit,level=2):
         return var*power
     
     # Try to evaluate all the name
-    var = _evalUnit(unit,level=level+2)
+    var = _evalUnit(unit,level=level+1)
     if not var is None:
         return var
         
@@ -959,6 +957,8 @@ def _getVar(name,level=2):
     caller_locals = dict(inspect.getmembers(inspect.stack()[level][0]))["f_locals"]
     # Get variable
     var = eval(name,caller_globals,caller_locals)
+    # Print for debugging stack level
+    # print('__name__=',eval('__name__',caller_globals,caller_locals))
     # Return variable
     return var
        

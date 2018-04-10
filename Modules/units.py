@@ -17,7 +17,7 @@ History:
 from __future__ import print_function
 from __future__ import division
 
-version = '10/04/2018-D'
+version = '10/04/2018-E'
 
 # Basic imports
 import numpy as np
@@ -215,7 +215,7 @@ def printUnit(name,unit='',sci=True,prefix=True,sep=''):
     """
     Special call to printVar without value
     """   
-    printVar(name,value=None,unit=unit,sci=sci,prefix=prefix,sep=sep,level=2)    
+    printVar(name,value=None,unit=unit,sci=sci,prefix=prefix,sep=sep,level=1)    
         
 # uVar class #########################################################
 
@@ -974,10 +974,10 @@ def _getVar(name,level=1):
     # Get caller globals and locals
     caller_globals = dict(inspect.getmembers(inspect.stack()[level+1][0]))["f_globals"]
     caller_locals = dict(inspect.getmembers(inspect.stack()[level+1][0]))["f_locals"]
+    # Print for debugging stack level (comment for normal use)
+    #print('__name__=',eval('__name__',caller_globals,caller_locals))
     # Get variable
     var = eval(name,caller_globals,caller_locals)
-    # Print for debugging stack level
-    # print('__name__=',eval('__name__',caller_globals,caller_locals))
     # Return variable
     return var
        

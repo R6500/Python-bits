@@ -17,7 +17,7 @@ History:
 from __future__ import print_function
 from __future__ import division
 
-version = '10/04/2018-C'
+version = '10/04/2018-D'
 
 # Basic imports
 import numpy as np
@@ -165,7 +165,7 @@ def _printUnit(unit):
         return
     print(' '+_unitName(unit))     
              
-def printVar(name,value=None,unit='',sci=True,prefix=True,sep='',level=1):
+def printVar(name,value=None,unit='',sci=True,prefix=True,sep='',level=0):
     """
     Print a variable name, value and units
     Required parameters:
@@ -177,7 +177,7 @@ def printVar(name,value=None,unit='',sci=True,prefix=True,sep='',level=1):
       prefix : use powers of 10 prefixes (Defaults to True)
          sep : separator between prefix and units (Defaults to none)
     Internal use parameters:
-       level : stack level to inspect globals
+       level : stack level of caller to inspect globals
     """
     # Try to evaluate variable if not given
     if value is None:
@@ -337,24 +337,27 @@ class uVar:
                     name = name + '^' + str(self.vector[i])
         return name  
 
-    def _reconstruct(self):
+    def _reconstruct(self,defaults=True):
         """
         Private function
         Reconstruct the own name from base units
+        If defaults is True, will use defaults if available
         """
         # Remove the scaling
         self.value = self.value * self.scale
         self.scale = 1.0
         
         # Check if it targets a default unit
-        tup = tuple(self.vector)
-        if tup in register:
-            unit = register[tup]
-            self.value = self.value/unit.scale
-            self.name = unit.name
-            self.complex = unit.complex
-            return
+        if defaults:
+            tup = tuple(self.vector)
+            if tup in register:
+                unit = register[tup]
+                self.value = self.value/unit.scale
+                self.name = unit.name
+                self.complex = unit.complex
+                return
         
+        # Not complex by default
         self.complex = False
         
         # It is not a default unit
@@ -374,9 +377,9 @@ class uVar:
                 return
             # No numerator but there is denominator                
             name += '1'
-            self.complex = True
-        # There is no denominator    
+            self.complex = True    
         else:
+            # There is numerator
             first = True
             nSubs = 0
             for i in range(0,nbase):
@@ -444,6 +447,14 @@ class uVar:
         scale = other.scale
         res = uVar(name,vector,value,scale)
         if other.complex: res.complex = True
+        return res
+           
+    def convert2base(self):
+        """
+        Convert to base units of the S.I.
+        """
+        res = self.copy()
+        res._reconstruct(False)
         return res
            
     # Logic checks -------------------------------------------------------------- 
@@ -764,7 +775,7 @@ def _evalPrefix(cad):
         return pot[cad]
     return None    
 
-def _evalUnit(name,level=3):
+def _evalUnit(name,level=1):
     """
     Internal function
     """   
@@ -777,7 +788,7 @@ def _evalUnit(name,level=3):
         raise unitsEx('unit name does not eval to uVar object')
     return var    
     
-def _getUnit(unit,level=2):
+def _getUnit(unit,level=1):
     """
     Internal function used by makeVar and makeArray
     Parameters:
@@ -953,16 +964,16 @@ def regUnit(unit):
 
 # calc module access ##############################################
 
-def _getVar(name,level=2):
+def _getVar(name,level=1):
     """
     Get a variable from its name
-    Level indicates stack level
-    Level 2 is appropiate if this function is called from a function
-    of this module that is called from the target context
+    Level indicates stack level of the caller
+    Level 1 is appropiate if this function is called from a function
+    that is called from the target context
     """
     # Get caller globals and locals
-    caller_globals = dict(inspect.getmembers(inspect.stack()[level][0]))["f_globals"]
-    caller_locals = dict(inspect.getmembers(inspect.stack()[level][0]))["f_locals"]
+    caller_globals = dict(inspect.getmembers(inspect.stack()[level+1][0]))["f_globals"]
+    caller_locals = dict(inspect.getmembers(inspect.stack()[level+1][0]))["f_locals"]
     # Get variable
     var = eval(name,caller_globals,caller_locals)
     # Print for debugging stack level
@@ -1017,7 +1028,7 @@ if calc_imported: # Only if correct import of calc
                ,logx=False,logy=False,grid=True,latex=False):
         # Get objects for the axis
         xv = _getVar(x)
-        ylistv = [_getVar(element,level=3) for element in ylist]
+        ylistv = [_getVar(element,level=2) for element in ylist]
         # Get values of the y list
         yvalues = _getValues(ylistv)
         # Create axes labels if needed
@@ -1046,8 +1057,8 @@ if calc_imported: # Only if correct import of calc
     def plotnn(xlist,ylist,title="",xt="",yt="",labels=[],location='best'
               ,logx=False,logy=False,grid=True,latex=False):
         # Get objects for the axes (level 3 because of list generator)
-        xlistv = [_getVar(element,level=3) for element in xlist]
-        ylistv = [_getVar(element,level=3) for element in ylist]
+        xlistv = [_getVar(element,level=2) for element in xlist]
+        ylistv = [_getVar(element,level=2) for element in ylist]
         # Get values of the axes lists
         xvalues = _getValues(xlistv)
         yvalues = _getValues(ylistv)
@@ -1153,6 +1164,10 @@ u_eV = (1.6e-19*u_J).makeUnit('eV',True) # eV
 
 u_in = (25.4e-3*u_m).makeUnit('in') # inch
 
+u_ft = (12*u_in).makeUnit('ft') # foot
+
+y_yd = (3*u_ft).makeUnit('yd') # yard
+
 u_mil = (u_in/1000).makeUnit('mil') # mil
 
 u_cm = (u_m/100).makeUnit('cm') # cm
@@ -1172,6 +1187,12 @@ u_percent = (u_none*0.01).makeUnit('%') # percent
 u_ppm = (u_none*1e-6).makeUnit('ppm') # parts per million
 
 # Special units ###############################################################
+
+'''
+Special units cover special cases but are not always coherent with
+other defined units
+Use them with care or don't use them at all
+'''
 
 u_rad_s = (u_Hz/2/np.pi).makeUnit('rad/s') # rad/s
 

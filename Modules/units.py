@@ -17,7 +17,7 @@ History:
 from __future__ import print_function
 from __future__ import division
 
-version = '10/04/2018-B'
+version = '10/04/2018-C'
 
 # Basic imports
 import numpy as np
@@ -1170,6 +1170,10 @@ u_day = (u_h*24).makeUnit('day') # days
 u_percent = (u_none*0.01).makeUnit('%') # percent
 
 u_ppm = (u_none*1e-6).makeUnit('ppm') # parts per million
+
+# Special units ###############################################################
+
+u_rad_s = (u_Hz/2/np.pi).makeUnit('rad/s') # rad/s
 
 # Phisics constants ###########################################################
 

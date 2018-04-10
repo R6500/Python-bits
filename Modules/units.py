@@ -10,13 +10,14 @@ History:
                Connection with sympy
    6/04/2018 : Connection with calc
    9/04/2018 : Units as text in make* functions
+  10/04/2018 : Corrections in unitless and Hz 
 '''
 
 # Python 2.7 compatibility
 from __future__ import print_function
 from __future__ import division
 
-version = '10/04/2018'
+version = '10/04/2018-B'
 
 # Basic imports
 import numpy as np
@@ -356,18 +357,25 @@ class uVar:
         
         self.complex = False
         
+        # It is not a default unit
         name =''
         num = False
         den = False
+        # Check if there is numerator and denominator
         for i in range(0,nbase):
             if self.vector[i]>0: num = True
-            if self.vector[i]<0: den = True     
+            if self.vector[i]<0: den = True  
+        # If there is no numerator            
         if not num:
+            # No numerator and no denominator 
             if not den:
                 self.name = ''
+                self.complex = True # don't use prefixes
                 return
+            # No numerator but there is denominator                
             name += '1'
             self.complex = True
+        # There is no denominator    
         else:
             first = True
             nSubs = 0
@@ -1088,6 +1096,7 @@ if calc_imported: # Only if correct import of calc
 # Base units ######################################################
 
 u_none = uVar('',[0,0,0,0,0,0,0])    # No units
+u_none.complex = True                # Don't use prefixes on this unit
 u_m    = uVar('m',[1,0,0,0,0,0,0])   # meter
 u_kg   = uVar('kg',[0,1,0,0,0,0,0])  # kilogram
 u_s    = uVar('s',[0,0,1,0,0,0,0])   # second
@@ -1104,35 +1113,35 @@ u_sr   = (u_none*1.0).makeUnit('sr',True) # steradian
 
 u_Hz   = (1.0/u_s).makeUnit('Hz',True) # hertz
 
-u_N    = (u_m*u_kg/u_s/u_s).makeUnit('N',True,True) # newton
+u_N    = (u_m*u_kg/u_s/u_s).makeUnit('N',True,True) # newton (Default for Force)
 
-u_Pa   = (u_N/u_m/u_m).makeUnit('Pa',True,True) # pascal
+u_Pa   = (u_N/u_m/u_m).makeUnit('Pa',True,True) # pascal (Default for Pressure)
 
-u_J    = (u_N*u_m).makeUnit('J',True,True)  # joule
+u_J    = (u_N*u_m).makeUnit('J',True,True)  # joule (Default for Energy)
 
-u_W    = (u_J/u_s).makeUnit('W',True,True) # watt
+u_W    = (u_J/u_s).makeUnit('W',True,True) # watt (Default for Power)
 
-u_C    = (u_s*u_A).makeUnit('C',True,True) # coulomb
+u_C    = (u_s*u_A).makeUnit('C',True,True) # coulomb (Default for Charge)
 
-u_V    = (u_W/u_A).makeUnit('V',True,True) # volt
+u_V    = (u_W/u_A).makeUnit('V',True,True) # volt (Default for Voltage)
 
-u_F    = (u_C/u_V).makeUnit('F',True,True) # farad
+u_F    = (u_C/u_V).makeUnit('F',True,True) # farad (Default for Capacitance)
 
-u_ohm  = (u_V/u_A).makeUnit('ohm',True,True) # ohm
+u_ohm  = (u_V/u_A).makeUnit('ohm',True,True) # ohm (Default for Resistance)
 
-u_S    = (u_A/u_V).makeUnit('S',True,True) # siemens
+u_S    = (u_A/u_V).makeUnit('S',True,True) # siemens (Default for Conductance)
 
-u_Wb   = (u_V*u_s).makeUnit('Wb',True,True) # weber
+u_Wb   = (u_V*u_s).makeUnit('Wb',True,True) # weber (Default for Magnetic flux)
 
-u_T    = (u_Wb/u_m/u_m).makeUnit('T',True,True) # tesla
+u_T    = (u_Wb/u_m/u_m).makeUnit('T',True,True) # tesla (Default for Magnetic flux density)
 
-u_H    = (u_Wb/u_A).makeUnit('H',True,True) # henry
+u_H    = (u_Wb/u_A).makeUnit('H',True,True) # henry (Default for Inductance)
 
 u_dC   = (u_K*1.0).makeUnit('dC',True) # celsius
 
 u_lm   = (u_cd*1.0).makeUnit('lm',True) # lumen
 
-u_lx   = (u_lm/u_m/u_m).makeUnit('lx',True,True) # lux
+u_lx   = (u_lm/u_m/u_m).makeUnit('lx',True,True) # lux 
 
 # Non SI units with sci prefixes ################################################
 
@@ -1157,6 +1166,10 @@ u_min = (u_s*60).makeUnit('min') # minute
 u_h = (u_min*60).makeUnit('h') # hour
 
 u_day = (u_h*24).makeUnit('day') # days
+
+u_percent = (u_none*0.01).makeUnit('%') # percent
+
+u_ppm = (u_none*1e-6).makeUnit('ppm') # parts per million
 
 # Phisics constants ###########################################################
 

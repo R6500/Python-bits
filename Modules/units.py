@@ -16,7 +16,7 @@ History:
 from __future__ import print_function
 from __future__ import division
 
-version = '9/04/2018-C'
+version = '10/04/2018'
 
 # Basic imports
 import numpy as np
@@ -1102,7 +1102,7 @@ u_rad  = (u_none*1.0).makeUnit('rad',True) # radian
 
 u_sr   = (u_none*1.0).makeUnit('sr',True) # steradian
 
-u_Hz   = (1.0/u_s).makeUnit('Hz',True,True) # hertz
+u_Hz   = (1.0/u_s).makeUnit('Hz',True) # hertz
 
 u_N    = (u_m*u_kg/u_s/u_s).makeUnit('N',True,True) # newton
 

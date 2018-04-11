@@ -11,13 +11,14 @@ History:
    6/04/2018 : Connection with calc
    9/04/2018 : Units as text in make* functions
   10/04/2018 : Corrections in unitless and Hz 
+  11/04/2018 : Addition of setSciForPrint
 '''
 
 # Python 2.7 compatibility
 from __future__ import print_function
 from __future__ import division
 
-version = '10/04/2018-E'
+version = '11/04/2018'
 
 # Basic imports
 import numpy as np
@@ -67,6 +68,9 @@ v_none  = np.array([0,0,0,0,0,0,0])
 
 # Base unit names
 v_names = ['m','kg','s','A','K','mol','cd']
+
+# Indicate if we use sci for __str__
+sci4str = False
 
 # Number presentation code ###########################################
 
@@ -135,7 +139,7 @@ def f2sci(v,unit='',nd=3,prefix=True,sep=''):
             return s
     
     s = s + 'E' + ('{:+d}').format(exp) + ' ' + unit
-    return s    
+    return s        
     
 def _unitName(unit):
     """
@@ -216,7 +220,12 @@ def printUnit(name,unit='',sci=True,prefix=True,sep=''):
     Special call to printVar without value
     """   
     printVar(name,value=None,unit=unit,sci=sci,prefix=prefix,sep=sep,level=1)    
-        
+    
+def setSciForPrint(flag=True):
+    global sci4str
+    sci4str = flag
+
+    
 # uVar class #########################################################
 
 class uVar:
@@ -702,6 +711,9 @@ class uVar:
         if mmVars_imported:
             if isinstance(self.value,mm.mmVar):
                 return str(self.value)+' '+self.name
+        # Check sci4str flag
+        if sci4str:        
+            return self.sci()   
         # Default case    
         return f2s(self.value)+' '+self.name      
       

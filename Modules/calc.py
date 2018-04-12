@@ -30,7 +30,7 @@ import matplotlib.pyplot as plt
 
 import inspect
 
-version = '8/4/2018'
+version = '8/4/2018B'
 
 # Define normal mode outside colaboratory
 colaboratory = False
@@ -431,9 +431,9 @@ Returns nothing
 '''
 def plotnn(xlist,ylist,title="",xt="",yt="",labels=[],location='best',logx=False,logy=False,grid=True):
     # Check for x, y given as strings
-    if type(xlist[0]==str):
+    if type(xlist[0])==str:
         if xt=='': xt=xlist[0]
-    if type(ylist[0]==str) and (labels==[]): 
+    if type(ylist[0])==str and (labels==[]): 
         labels=ylist
         
     xlist2 = []

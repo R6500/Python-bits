@@ -17,7 +17,8 @@ History:
                Correction on f2s  
                Elimination of electronics functions that now belong to 
                the 'electronicsDC' module
-   7/04/2018 : Add getVar and named parameters in plot functions               
+   7/04/2018 : Add getVar and named parameters in plot functions 
+  13/04/2018 : Corrected error in plot1n and plotnn   
 '''
 
 # Python 2.7 compatibility
@@ -30,7 +31,7 @@ import matplotlib.pyplot as plt
 
 import inspect
 
-version = '8/4/2018B'
+version = '13/4/2018'
 
 # Define normal mode outside colaboratory
 colaboratory = False
@@ -370,7 +371,7 @@ def plot1n(x,ylist,title="",xt="",yt="",labels=[],location='best',logx=False,log
     if type(x)==str:
         if xt=='': xt=x
         x = getVar(x,level=2)
-    if type(ylist[0]==str) and (labels==[]): 
+    if type(ylist[0])==str and (labels==[]): 
         labels=ylist
     ylist2 = []
     for element in ylist:

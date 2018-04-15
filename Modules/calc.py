@@ -19,6 +19,7 @@ History:
                the 'electronicsDC' module
    7/04/2018 : Add getVar and named parameters in plot functions 
   13/04/2018 : Corrected error in plot1n and plotnn   
+  15/04/2018 : Add hook to plot functions
 '''
 
 # Python 2.7 compatibility
@@ -31,7 +32,7 @@ import matplotlib.pyplot as plt
 
 import inspect
 
-version = '13/4/2018'
+version = '15/4/2018'
 
 # Define normal mode outside colaboratory
 colaboratory = False
@@ -222,7 +223,7 @@ def _jplotXY(x,y,label="",logx=False,logy=False):
      
 # Public functions ######################################################################
      
-def jplot11(x,y,title="",xt="",yt="",logx=False,logy=False,grid=True):
+def jplot11(x,y,title="",xt="",yt="",logx=False,logy=False,grid=True,hook=None):
 
     # Generate sequence if x is not provided
     if x == []:
@@ -232,9 +233,13 @@ def jplot11(x,y,title="",xt="",yt="",logx=False,logy=False,grid=True):
 
     _jplotXY(x,y,logx=logx,logy=logy)
     
+    if not hook is None:
+        hook() 
+    
     _jplotEnd(fig,ax)
     
-def jplot1n(x,ylist,title="",xt="",yt="",labels=[],location='best',logx=False,logy=False,grid=True):
+def jplot1n(x,ylist,title="",xt="",yt="",labels=[],location='best',logx=False,logy=False
+           ,grid=True,hook=None):
 
     # Generate sequence is x is not provided
     if x == []:
@@ -249,9 +254,13 @@ def jplot1n(x,ylist,title="",xt="",yt="",labels=[],location='best',logx=False,lo
         for y,lbl in zip(ylist,labels):
             _jplotXY(x,y,label=lbl,logx=logx,logy=logy)
 
+    if not hook is None:
+        hook()        
+            
     _jplotEnd(fig,ax,labels,location)   
   
-def jplotnn(xlist,ylist,title="",xt="",yt="",labels=[],location='best',logx=False,logy=False,grid=True):
+def jplotnn(xlist,ylist,title="",xt="",yt="",labels=[],location='best',logx=False,logy=False
+           ,grid=True,hook=None):
 
     fig,ax=_jplotStart(title,xt,yt,grid)
     
@@ -262,6 +271,9 @@ def jplotnn(xlist,ylist,title="",xt="",yt="",labels=[],location='best',logx=Fals
         for x,y,lbl in zip(xlist,ylist,labels):
             _jplotXY(x,y,label=lbl,logx=logx,logy=logy)
             
+    if not hook is None:
+        hook()        
+            
     _jplotEnd(fig,ax,labels,location)  
     
 def jplotHist(v,bins=10,title="",xt="",yt="",grid=True):
@@ -269,6 +281,9 @@ def jplotHist(v,bins=10,title="",xt="",yt="",grid=True):
     fig,ax = _jplotStart(title,xt,yt,grid)
 
     plt.hist(v,bins)
+    
+    if not hook is None:
+        hook()
     
     _jplotEnd(fig,ax)       
     
@@ -312,10 +327,11 @@ Optional parameters:
    logx : Use logarithmic x axis (Defaults to False)
    logy : Use logarithmic x axis (Defaults to False)
    grid : Draw a grid (Defaults to true)
+   hook : Function to be executed before showing the graph
 
 Returns nothing
 '''
-def plot11(x,y,title="",xt="",yt="",logx=False,logy=False,grid=True):
+def plot11(x,y,title="",xt="",yt="",logx=False,logy=False,grid=True,hook=None):
     # Check for x, y given as strings
     if type(x)==str:
         if xt=='': xt=x
@@ -340,6 +356,8 @@ def plot11(x,y,title="",xt="",yt="",logx=False,logy=False,grid=True):
     pl.title(title)
     if grid:
         pl.grid()
+    if not hook is None:
+        hook()    
     pl.show()
     pl.close()
     
@@ -363,10 +381,11 @@ Optional parameters:
      logx : Use logarithmic x axis (Defaults to False)
      logy : Use logarithmic x axis (Defaults to False)
      grid : Draw a grid (Defaults to true)
+     hook : Function to be executed before showing the graph
 
 Returns nothing
 '''
-def plot1n(x,ylist,title="",xt="",yt="",labels=[],location='best',logx=False,logy=False,grid=True):
+def plot1n(x,ylist,title="",xt="",yt="",labels=[],location='best',logx=False,logy=False,grid=True,hook=None):
     # Check for x, y given as strings
     if type(x)==str:
         if xt=='': xt=x
@@ -383,7 +402,7 @@ def plot1n(x,ylist,title="",xt="",yt="",labels=[],location='best',logx=False,log
 
     # Check if we are in colaboratory
     if colaboratory:
-        jplot1n(x,ylist,title,xt,yt,labels,location,logx,logy,grid)
+        jplot1n(x,ylist,title,xt,yt,labels,location,logx,logy,grid,hook)
         return
         
     # Generate sequence is x is not provided
@@ -406,12 +425,14 @@ def plot1n(x,ylist,title="",xt="",yt="",labels=[],location='best',logx=False,log
         pl.grid()
     if not labels == []:
         pl.legend(loc=location)
+    if not hook is None:
+        hook()    
     pl.show() 
     pl.close()    
   
 '''
 @plotnn@
-plotnn(xlist,ylist,title,xt,yt,labels,location,logx,logy,grid)
+plotnn(xlist,ylist,title,xt,yt,labels,location,logx,logy,grid,hook=None)
 Plot several curves with different inputs and outputs
 
 Required parameters:
@@ -430,7 +451,8 @@ Optional parameters:
 
 Returns nothing
 '''
-def plotnn(xlist,ylist,title="",xt="",yt="",labels=[],location='best',logx=False,logy=False,grid=True):
+def plotnn(xlist,ylist,title="",xt="",yt="",labels=[],location='best'
+           ,logx=False,logy=False,grid=True,hook=None):
     # Check for x, y given as strings
     if type(xlist[0])==str:
         if xt=='': xt=xlist[0]
@@ -455,7 +477,7 @@ def plotnn(xlist,ylist,title="",xt="",yt="",labels=[],location='best',logx=False
     
     # Check if we are in colaboratory
     if colaboratory:
-        jplotnn(xlist,ylist,title,xt,yt,labels,location,logx,logy,grid)
+        jplotnn(xlist,ylist,title,xt,yt,labels,location,logx,logy,grid,hook)
         return
 
     plt.figure(facecolor="white")   # White border
@@ -471,6 +493,8 @@ def plotnn(xlist,ylist,title="",xt="",yt="",labels=[],location='best',logx=False
     pl.grid()
     if not labels == []:
         pl.legend(loc=location)
+    if not hook is None:
+        hook()
     pl.show()  
     pl.close()  
   

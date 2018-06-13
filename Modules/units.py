@@ -862,6 +862,29 @@ def makeArray(list,unit):
     """    
     unit = _getUnit(unit)
     return unit*np.array(list)
+    
+def makeRange(min,max,number):
+    """
+    Creates a uVar object with numpy array as value
+    Parameters:
+          min : unit uVar object
+          max : unit uVar object
+       number : number of points
+    returns a new uVar object   
+    """  
+    a = min.convert2base()
+    b = max.convert2base()
+    
+    if not a.check(b):
+        raise unitsEx('Cannot use incompatible units')
+      
+    new = a.copy();
+    
+    step = (b.value - a.value)/number
+    
+    new.value = np.arange(a.value,b.value,step)
+        
+    return new 
   
 # Unary dimensionless functions ############################################
 

@@ -12,13 +12,14 @@ History:
    9/04/2018 : Units as text in make* functions
   10/04/2018 : Corrections in unitless and Hz 
   11/04/2018 : Addition of setSciForPrint
+  13/06/2018 : Addition of makeRange function
 '''
 
 # Python 2.7 compatibility
 from __future__ import print_function
 from __future__ import division
 
-version = '11/04/2018'
+version = '13/06/2018'
 
 # Basic imports
 import numpy as np

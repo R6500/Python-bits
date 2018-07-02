@@ -37,6 +37,9 @@ version = '15/4/2018'
 # Define normal mode outside colaboratory
 colaboratory = False
 
+# Interactive plot not enabled by default
+iplots = False   
+
 #########################################################################################
 # PRINTING CODE                                                                         #
 #########################################################################################
@@ -137,6 +140,34 @@ def getVar(name,level=1):
     return var    
     
 #########################################################################################
+# JUPYTER DRAWING CODE                                                                  #
+#########################################################################################
+
+def interactivePlots(flag=True):
+    """
+    ----------------------------------------------------------------
+    interactivePlots(flag)
+    Activates interactive plotting on Jypyter
+    Requires also setting the magic '%matplotlib notebook'
+    Using the optinal parameter to False, return to inline mode
+    
+    Optional parametres:
+        flag : Set interactive mode (defaults to True)
+    
+    Included in slab.py
+    ----------------------------------------------------------------
+    """
+    global iplots
+    if flag:
+        iplots = True
+        print("Plots are now interactive")
+        print("Remember to also set '%matplotlib notebook' in Jupyter")
+    else:
+        iplots = False
+        print("Plots are static now")
+        print("Remember to also set '%matplotlib inline' in Jupyter")     
+    
+#########################################################################################
 # COLABORATORY DRAWING CODE                                                             #
 #########################################################################################    
 
@@ -170,8 +201,12 @@ Returns:
   fig : Figure object
   ax  : Axes object  
 '''
-def _jplotStart(title="",xt="",yt="",grid=True):
+def _jplotStart(title="",xt="",yt="",grid=True,xlim=None,ylim=None):
     fig=plt.figure()
+    if xlim != None:
+        plt.xlim(xlim[0],xlim[1])
+    if ylim != None:
+        plt.ylim(ylim[0],ylim[1])      
     ax = fig.add_subplot(111)
     ax.set_facecolor("white")
     ax.set_title(title)
@@ -223,13 +258,9 @@ def _jplotXY(x,y,label="",logx=False,logy=False):
      
 # Public functions ######################################################################
      
-def jplot11(x,y,title="",xt="",yt="",logx=False,logy=False,grid=True,hook=None):
-
-    # Generate sequence if x is not provided
-    if x == []:
-        x = np.arange(0,len(y))
+def jplot11(x,y,title="",xt="",yt="",logx=False,logy=False,grid=True,hook=None,xlim=None,ylim=None):
        
-    fig,ax = _jplotStart(title,xt,yt,grid)
+    fig,ax = _jplotStart(title,xt,yt,grid,xlim,ylim)
 
     _jplotXY(x,y,logx=logx,logy=logy)
     
@@ -239,13 +270,9 @@ def jplot11(x,y,title="",xt="",yt="",logx=False,logy=False,grid=True,hook=None):
     _jplotEnd(fig,ax)
     
 def jplot1n(x,ylist,title="",xt="",yt="",labels=[],location='best',logx=False,logy=False
-           ,grid=True,hook=None):
-
-    # Generate sequence is x is not provided
-    if x == []:
-        x = np.arange(0,len(ylist[0]))        
-        
-    fig,ax=_jplotStart(title,xt,yt,grid)
+           ,grid=True,hook=None,xlim=None,ylim=None):
+    
+    fig,ax=_jplotStart(title,xt,yt,grid,xlim,ylim)
     
     if labels == []:
         for y in ylist:
@@ -260,9 +287,9 @@ def jplot1n(x,ylist,title="",xt="",yt="",labels=[],location='best',logx=False,lo
     _jplotEnd(fig,ax,labels,location)   
   
 def jplotnn(xlist,ylist,title="",xt="",yt="",labels=[],location='best',logx=False,logy=False
-           ,grid=True,hook=None):
+           ,grid=True,hook=None,xlim=None,ylim=None):
 
-    fig,ax=_jplotStart(title,xt,yt,grid)
+    fig,ax=_jplotStart(title,xt,yt,grid,xlim,ylim)
     
     if labels == []:
         for x,y in zip(xlist,ylist):
@@ -287,6 +314,7 @@ def jplotHist(v,bins=10,title="",xt="",yt="",grid=True):
     
     _jplotEnd(fig,ax)       
     
+     
 #########################################################################################
 # DRAWING CODE                                                                          #
 #########################################################################################
@@ -311,7 +339,7 @@ def plotXY(x,y,label="",logx=False,logy=False):
         
 '''
 @plot11@
-plot11(x,y,title,xt,yt,logx,logy,grid)
+plot11(x,y,title,xt,yt,logx,logy,grid,hook,xlim,ylim)
 Plot one input against one output
 If x is an empty list [], a sequence number
 will be used for the x axis
@@ -326,12 +354,14 @@ Optional parameters:
      yt : Label for y axis (Defaults to none or y string)
    logx : Use logarithmic x axis (Defaults to False)
    logy : Use logarithmic x axis (Defaults to False)
-   grid : Draw a grid (Defaults to true)
+   grid : Draw a grid (Defaults to true) 
    hook : Function to be executed before showing the graph
+   xlim : Tuple (min,max) with Limits for x axis
+   ylim : Tuple (min,max) with Limits for y axis     
 
 Returns nothing
 '''
-def plot11(x,y,title="",xt="",yt="",logx=False,logy=False,grid=True,hook=None):
+def plot11(x,y,title="",xt="",yt="",logx=False,logy=False,grid=True,hook=None,xlim=None,ylim=None):
     # Check for x, y given as strings
     if type(x)==str:
         if xt=='': xt=x
@@ -339,17 +369,21 @@ def plot11(x,y,title="",xt="",yt="",logx=False,logy=False,grid=True,hook=None):
     if type(y)==str:
         if yt=='': yt=y
         y = getVar(y,level=2)
-        
-    # Check colaboratory    
-    if colaboratory:
-        jplot11(x,y,title,xt,yt,logx,logy,grid)
-        return
-     
+ 
     # Generate sequence if x is not provided
     if x == []:
-        x = np.arange(0,len(y))
-       
+        x = np.arange(0,len(y))      
+                
+    # Check colaboratory    
+    if colaboratory:
+        jplot11(x,y,title,xt,yt,logx,logy,grid,hook,xlim,ylim)
+        return
+ 
     plt.figure(facecolor="white")   # White border
+    if xlim != None:
+        plt.xlim(xlim[0],xlim[1])
+    if ylim != None:
+        plt.ylim(ylim[0],ylim[1])    
     plotXY(x,y,logx=logx,logy=logy)
     pl.xlabel(xt)
     pl.ylabel(yt)
@@ -358,12 +392,13 @@ def plot11(x,y,title="",xt="",yt="",logx=False,logy=False,grid=True,hook=None):
         pl.grid()
     if not hook is None:
         hook()    
-    pl.show()
-    pl.close()
+    if not iplots:    
+        pl.show()
+        pl.close()
     
 '''
 @plot1n@
-plot1n(x,ylist,title,xt,yt,labels,location,logx,logy,grid)
+plot1n(x,ylist,title,xt,yt,labels,location,logx,logy,grid,hook,xlim,ylim)
 Plot one input against several outputs
 If x is an empty list [], a sequence number
 will be used for the x axis
@@ -381,11 +416,14 @@ Optional parameters:
      logx : Use logarithmic x axis (Defaults to False)
      logy : Use logarithmic x axis (Defaults to False)
      grid : Draw a grid (Defaults to true)
-     hook : Function to be executed before showing the graph
+     hook : Function to be executed before showing the graph     
+     xlim : Tuple (min,max) with Limits for x axis
+     ylim : Tuple (min,max) with Limits for y axis 
 
 Returns nothing
 '''
-def plot1n(x,ylist,title="",xt="",yt="",labels=[],location='best',logx=False,logy=False,grid=True,hook=None):
+def plot1n(x,ylist,title="",xt="",yt="",labels=[],location='best'
+            ,logx=False,logy=False,grid=True,hook=None,xlim=None,ylim=None):
     # Check for x, y given as strings
     if type(x)==str:
         if xt=='': xt=x
@@ -400,16 +438,20 @@ def plot1n(x,ylist,title="",xt="",yt="",labels=[],location='best',logx=False,log
             ylist2.append(element)
     ylist=ylist2        
 
-    # Check if we are in colaboratory
-    if colaboratory:
-        jplot1n(x,ylist,title,xt,yt,labels,location,logx,logy,grid,hook)
-        return
-        
     # Generate sequence is x is not provided
     if x == []:
-        x = np.arange(0,len(ylist[0]))        
+        x = np.arange(0,len(ylist[0]))          
+    
+    # Check if we are in colaboratory
+    if colaboratory:
+        jplot1n(x,ylist,title,xt,yt,labels,location,logx,logy,grid,hook,xlim,ylim)
+        return    
         
     plt.figure(facecolor="white")   # White border
+    if xlim != None:
+        plt.xlim(xlim[0],xlim[1])
+    if ylim != None:
+        plt.ylim(ylim[0],ylim[1])      
     if labels == []:
         for y in ylist:
             plotXY(x,y,logx=logx,logy=logy)
@@ -427,12 +469,13 @@ def plot1n(x,ylist,title="",xt="",yt="",labels=[],location='best',logx=False,log
         pl.legend(loc=location)
     if not hook is None:
         hook()    
-    pl.show() 
-    pl.close()    
+    if not iplots:    
+        pl.show()
+        pl.close()   
   
 '''
 @plotnn@
-plotnn(xlist,ylist,title,xt,yt,labels,location,logx,logy,grid,hook=None)
+plotnn(xlist,ylist,title,xt,yt,labels,location,logx,logy,grid,hook,xlim,ylim)
 Plot several curves with different inputs and outputs
 
 Required parameters:
@@ -448,11 +491,14 @@ Optional parameters:
      logx : Use logarithmic x axis (Defaults to False)
      logy : Use logarithmic x axis (Defaults to False)
      grid : Draw a grid (Defaults to true)
+     hook : Function to be executed before showing the graph     
+     xlim : Tuple (min,max) with Limits for x axis
+     ylim : Tuple (min,max) with Limits for y axis  
 
 Returns nothing
 '''
 def plotnn(xlist,ylist,title="",xt="",yt="",labels=[],location='best'
-           ,logx=False,logy=False,grid=True,hook=None):
+           ,logx=False,logy=False,grid=True,hook=None,xlim=None,ylim=None):
     # Check for x, y given as strings
     if type(xlist[0])==str:
         if xt=='': xt=xlist[0]
@@ -474,13 +520,17 @@ def plotnn(xlist,ylist,title="",xt="",yt="",labels=[],location='best'
         else:
             ylist2.append(element)
     ylist=ylist2    
-    
+        
     # Check if we are in colaboratory
     if colaboratory:
-        jplotnn(xlist,ylist,title,xt,yt,labels,location,logx,logy,grid,hook)
+        jplotnn(xlist,ylist,title,xt,yt,labels,location,logx,logy,grid,hook,xlim,ylim)
         return
 
     plt.figure(facecolor="white")   # White border
+    if xlim != None:
+        plt.xlim(xlim[0],xlim[1])
+    if ylim != None:
+        plt.ylim(ylim[0],ylim[1])      
     if labels == []:
         for x,y in zip(xlist,ylist):
             plotXY(x,y,logx=logx,logy=logy)
@@ -495,8 +545,9 @@ def plotnn(xlist,ylist,title="",xt="",yt="",labels=[],location='best'
         pl.legend(loc=location)
     if not hook is None:
         hook()
-    pl.show()  
-    pl.close()  
+    if not iplots:    
+        pl.show()
+        pl.close()  
   
 '''
 @plotHist@
@@ -536,8 +587,9 @@ def plotHist(v,bins=10,title="",xt="",yt="",grid=True):
     pl.title(title)
     if grid:
         pl.grid()
-    pl.show()
-    pl.close()
+    if not iplots:    
+        pl.show()
+        pl.close()
    
   
 #########################################################################################

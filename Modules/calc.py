@@ -20,6 +20,7 @@ History:
    7/04/2018 : Add getVar and named parameters in plot functions 
   13/04/2018 : Corrected error in plot1n and plotnn   
   15/04/2018 : Add hook to plot functions
+   2/07/2018 : Add interactive plots
 '''
 
 # Python 2.7 compatibility
@@ -32,7 +33,7 @@ import matplotlib.pyplot as plt
 
 import inspect
 
-version = '15/4/2018'
+version = '2/7/2018'
 
 # Define normal mode outside colaboratory
 colaboratory = False

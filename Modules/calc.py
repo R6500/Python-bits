@@ -33,7 +33,7 @@ import matplotlib.pyplot as plt
 
 import inspect
 
-version = '2/7/2018'
+version = '2/7/2018B'
 
 # Define normal mode outside colaboratory
 colaboratory = False
@@ -304,7 +304,7 @@ def jplotnn(xlist,ylist,title="",xt="",yt="",labels=[],location='best',logx=Fals
             
     _jplotEnd(fig,ax,labels,location)  
     
-def jplotHist(v,bins=10,title="",xt="",yt="",grid=True):
+def jplotHist(v,bins=10,title="",xt="",yt="",grid=True,hook=None):
 
     fig,ax = _jplotStart(title,xt,yt,grid)
 

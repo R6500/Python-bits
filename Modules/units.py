@@ -13,7 +13,7 @@ History:
   10/04/2018 : Corrections in unitless and Hz 
   11/04/2018 : Addition of setSciForPrint
   13/06/2018 : Addition of makeRange function
-   6/09/2018 : Added methods: __getitem__ , strip
+   6/09/2018 : Added methods: __getitem__ , strip , __len__
 '''
 
 # Python 2.7 compatibility
@@ -761,12 +761,15 @@ class uVar:
         """
         printVar(name,self,unit,sci,prefix,sep)
    
-    # slicing operations -----------------------------------------------------    
+    # slicing and len operations -------------------------------------------------    
     
     def __getitem__(self,key):
         object = self.copy()
         object.value = self.value[key]
         return object
+        
+    def __len__(self):
+        return len(self.value)
         
     # Get unitless value in S.I. ---------------------------------------------
 

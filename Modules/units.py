@@ -13,13 +13,14 @@ History:
   10/04/2018 : Corrections in unitless and Hz 
   11/04/2018 : Addition of setSciForPrint
   13/06/2018 : Addition of makeRange function
+   6/09/2018 : Added methods: __getitem__ , strip
 '''
 
 # Python 2.7 compatibility
 from __future__ import print_function
 from __future__ import division
 
-version = '13/06/2018'
+version = '6/09/2018'
 
 # Basic imports
 import numpy as np
@@ -760,6 +761,19 @@ class uVar:
         """
         printVar(name,self,unit,sci,prefix,sep)
    
+    # slicing operations -----------------------------------------------------    
+    
+    def __getitem__(self,key):
+        object = self.copy()
+        object.value = self.value[key]
+        return object
+        
+    # Get unitless value in S.I. ---------------------------------------------
+
+    def strip(self):
+        object = self.copy() 
+        object._reconstruct(False)
+        return object.value        
   
 # Unary non dimensionless functions ########################################
 
@@ -1207,6 +1221,8 @@ y_yd = (3*u_ft).makeUnit('yd') # yard
 u_mil = (u_in/1000).makeUnit('mil') # mil
 
 u_cm = (u_m/100).makeUnit('cm') # cm
+
+u_mm = (u_m/1000).makeUnit('mm') # mm
 
 u_Ang = (1e-10*u_m).makeUnit('Ang') # Angstrom
 
